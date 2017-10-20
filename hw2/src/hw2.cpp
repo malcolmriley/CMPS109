@@ -1,5 +1,5 @@
 //============================================================================
-// Description : Homework 2 for CMPS 109: Dijikstra's Algorithm
+// Description : Homework 2 for CMPS 109: Dijkstra's Algorithm
 //============================================================================
 
 #include <iostream>
