@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# Eclipse Nonsense
+*.project
+*.cproject
+*.settings
+*.settings.*
