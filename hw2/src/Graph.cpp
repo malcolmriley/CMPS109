@@ -24,7 +24,7 @@
  */
 Graph::Graph(int passedNodeQuantity, bool passedIsDirected) {
 	directed = passedIsDirected;
-	vertices = 0;
+	vertices = passedNodeQuantity;
 	edges = 0;
 	values = new double* [passedNodeQuantity];
 
@@ -136,6 +136,7 @@ bool Graph::isDirected() {
 void Graph::addEdge(int passedFirstNode, int passedSecondNode, double passedEdgeWeight) {
 	if(Graph::validateEdge(passedFirstNode, passedSecondNode)) {
 		Graph::setEdge(passedFirstNode, passedSecondNode, passedEdgeWeight);
+		edges += 1;
 	}
 }
 
@@ -145,9 +146,7 @@ void Graph::addEdge(int passedFirstNode, int passedSecondNode, double passedEdge
  * If the Graph is directed, adds an edge in the direction passedFirstNode->passedSecondNode.
  */
 void Graph::addEdge(int passedFirstNode, int passedSecondNode) {
-	if(Graph::validateEdge(passedFirstNode, passedSecondNode)) {
-		Graph::setEdge(passedFirstNode, passedSecondNode, 1);
-	}
+	Graph::addEdge(passedFirstNode, passedSecondNode, 1);
 }
 
 /**
@@ -158,5 +157,6 @@ void Graph::addEdge(int passedFirstNode, int passedSecondNode) {
 void Graph::removeEdge(int passedFirstNode, int passedSecondNode) {
 	if(Graph::validateEdge(passedFirstNode, passedSecondNode)) {
 		Graph::setEdge(passedFirstNode, passedSecondNode, EDGE_UNDEFINED);
+		edges -= 1;
 	}
 }
