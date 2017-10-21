@@ -41,6 +41,8 @@ public:
 	double getDensity();
 	bool isDirected();
 	double getAverageWeight();
+	T getNode(int);
+	void setNode(T, int);
 
 	// Manipulators
 	void addEdge(int, int, double);

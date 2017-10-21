@@ -189,3 +189,25 @@ void Graph<T>::removeEdge(int passedFirstNode, int passedSecondNode) {
 		edgeSum -= weight;
 	}
 }
+
+/**
+ * Returns the value of the node specified by the passed index, or nullptr if no such node exists.
+ */
+template <typename T>
+T Graph<T>::getNode(int passedIndex) {
+	if (Graph::validateIndex(passedIndex)) {
+		return nodeValues[passedIndex];
+	}
+	return nullptr;
+}
+
+/**
+ * Adds the value to the Graph at the passed index.
+ */
+template <typename T>
+void Graph<T>::setNode(T passedValue, int passedIndex) {
+	if (Graph::validateIndex(passedIndex)) {
+		nodeValues[passedIndex] = passedValue;
+	}
+}
+
