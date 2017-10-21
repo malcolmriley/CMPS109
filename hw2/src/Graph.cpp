@@ -19,20 +19,41 @@
 /* Constructor-Destructor */
 
 /**
- * Initializes a new Graph with passedNodeQuantity number of nodes; passedIsDirected determines
- * whether or not this is a directed Graph.
+ * Initializer function
  */
 template <typename T>
-Graph<T>::Graph(int passedNodeQuantity, bool passedIsDirected) {
+void Graph<T>::init(int passedNodeQuantity, bool passedIsDirected) {
+	// Initialize internal values
 	directed = passedIsDirected;
 	vertices = passedNodeQuantity;
 	edgeSum = 0;
 	edges = 0;
-	edgeMatrix = new double* [passedNodeQuantity];
+	edgeMatrix = new double*[passedNodeQuantity];
 	nodeValues = new T[passedNodeQuantity];
+}
+
+template <typename T>
+Graph<T>::Graph(int passedNodeQuantity, bool passedIsDirected) {
+	Graph::init(passedNodeQuantity, passedIsDirected);
+}
+
+/**
+ * Initializes a new Graph with passedNodeQuantity number of nodes; passedIsDirected determines
+ * whether or not this is a directed Graph.
+ */
+template <typename T>
+Graph<T>::Graph(int passedNodeQuantity, bool passedIsDirected, T passedNodeArray[]) {
+	Graph::init(passedNodeQuantity, passedIsDirected);
+
+	// Initialize node value array
+	if (passedNodeArray) {
+		for (int ii = 0; ii < passedNodeQuantity; ii += 1) {
+			nodeValues[ii] = passedNodeArray[ii];
+		}
+	}
 
 	// Initialize "dynamic" 2D array
-	for(int ii = 0; ii < passedNodeQuantity; ii += 1) {
+	for (int ii = 0; ii < passedNodeQuantity; ii += 1) {
 		edgeMatrix[ii] = new double[passedNodeQuantity];
 		for (int jj = 0; jj < passedNodeQuantity; jj += 1) {
 			edgeMatrix[ii][jj] = EDGE_UNDEFINED;

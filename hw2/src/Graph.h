@@ -17,6 +17,7 @@ template <typename T>
 class Graph {
 private:
 	// Internal Methods
+	void init(int size, bool directed);
 	bool validateIndex(int);
 	bool validateEdge(int, int);
 	bool edgeDefined(int, int);
@@ -30,6 +31,7 @@ protected:
 	T nodeValues[];
 public:
 	// Constructor-Destructor
+	Graph(int, bool, T[]);
 	Graph(int, bool);
 	virtual ~Graph();
 
