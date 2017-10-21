@@ -24,7 +24,7 @@ protected:
 	int vertices;
 	int edges;
 	bool directed;
-	double values[][];
+	double** values;
 public:
 	// Constructor-Destructor
 	Graph(int, bool);
