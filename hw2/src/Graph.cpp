@@ -219,7 +219,7 @@ T Graph<T>::getNode(int passedIndex) {
 	if (Graph::validateIndex(passedIndex)) {
 		return nodeValues[passedIndex];
 	}
-	return nullptr;
+	return 0;
 }
 
 /**
