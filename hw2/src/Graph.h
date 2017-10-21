@@ -13,10 +13,10 @@
 
 #define EDGE_UNDEFINED -1
 
+template <typename T>
 class Graph {
 private:
 	// Internal Methods
-	double edgeSum;
 	bool validateIndex(int);
 	bool validateEdge(int, int);
 	bool edgeDefined(int, int);
@@ -25,7 +25,9 @@ protected:
 	int vertices;
 	int edges;
 	bool directed;
-	double** values;
+	double** edgeMatrix;
+	double edgeSum;
+	T nodeValues[];
 public:
 	// Constructor-Destructor
 	Graph(int, bool);
@@ -34,7 +36,7 @@ public:
 	// Accessors
 	int getVertexCount();
 	int getEdgeCount();
-	bool hasEdge(int, int);
+	bool adjacent(int, int);
 	double getEdgeWeight(int, int);
 	double getDensity();
 	bool isDirected();

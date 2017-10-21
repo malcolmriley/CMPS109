@@ -22,47 +22,55 @@
  * Initializes a new Graph with passedNodeQuantity number of nodes; passedIsDirected determines
  * whether or not this is a directed Graph.
  */
-Graph::Graph(int passedNodeQuantity, bool passedIsDirected) {
+template <typename T>
+Graph<T>::Graph(int passedNodeQuantity, bool passedIsDirected) {
 	directed = passedIsDirected;
 	vertices = passedNodeQuantity;
 	edgeSum = 0;
 	edges = 0;
-	values = new double* [passedNodeQuantity];
+	edgeMatrix = new double* [passedNodeQuantity];
+	nodeValues = new T[passedNodeQuantity];
 
 	// Initialize "dynamic" 2D array
 	for(int ii = 0; ii < passedNodeQuantity; ii += 1) {
-		values[ii] = new double[passedNodeQuantity];
+		edgeMatrix[ii] = new double[passedNodeQuantity];
 		for (int jj = 0; jj < passedNodeQuantity; jj += 1) {
-			values[ii][jj] = EDGE_UNDEFINED;
+			edgeMatrix[ii][jj] = EDGE_UNDEFINED;
 		}
 	}
 }
 
-Graph::~Graph() {
-	// Free stored values
+template <typename T>
+Graph<T>::~Graph() {
+	// Free stored edgeMatrix
 	for (int ii = 0; ii < vertices; ii += 1) {
-		delete[] values[ii];
+		delete[] edgeMatrix[ii];
 	}
-	delete[] values;
+	delete[] edgeMatrix;
+	delete[] nodeValues;
 }
 
 /* Internal Methods */
-bool Graph::validateIndex(int passedIndex) {
+template <typename T>
+bool Graph<T>::validateIndex(int passedIndex) {
 	return (passedIndex > 0);
 }
 
-bool Graph::validateEdge(int passedFirstIndex, int passedSecondIndex) {
+template <typename T>
+bool Graph<T>::validateEdge(int passedFirstIndex, int passedSecondIndex) {
 	return(Graph::validateIndex(passedFirstIndex) && Graph::validateIndex(passedSecondIndex) && Graph::edgeDefined(passedFirstIndex, passedSecondIndex));
 }
 
-bool Graph::edgeDefined(int passedFirstIndex, int passedSecondIndex) {
-	return(values[passedFirstIndex][passedSecondIndex] >= 0);
+template <typename T>
+bool Graph<T>::edgeDefined(int passedFirstIndex, int passedSecondIndex) {
+	return(edgeMatrix[passedFirstIndex][passedSecondIndex] >= 0);
 }
 
-void Graph::setEdge(int passedFirstNode, int passedSecondNode, double passedEdgeWeight) {
-	values[passedFirstNode][passedSecondNode] = passedEdgeWeight;
+template <typename T>
+void Graph<T>::setEdge(int passedFirstNode, int passedSecondNode, double passedEdgeWeight) {
+	edgeMatrix[passedFirstNode][passedSecondNode] = passedEdgeWeight;
 	if (!directed) {
-		values[passedSecondNode][passedFirstNode] = passedEdgeWeight;
+		edgeMatrix[passedSecondNode][passedFirstNode] = passedEdgeWeight;
 	}
 }
 
@@ -71,14 +79,16 @@ void Graph::setEdge(int passedFirstNode, int passedSecondNode, double passedEdge
 /**
  * Returns the number of vertices (nodes) in this graph.
  */
-int Graph::getVertexCount() {
+template <typename T>
+int Graph<T>::getVertexCount() {
 	return vertices;
 }
 
 /**
  * Returns the number of edges in this graph.
  */
-int Graph::getEdgeCount() {
+template <typename T>
+int Graph<T>::getEdgeCount() {
 	return edges;
 }
 
@@ -87,7 +97,8 @@ int Graph::getEdgeCount() {
  *
  * If the Graph is directed, checks for edge in the direction passedFirstNode -> passedSecondNode.
  */
-bool Graph::hasEdge(int passedFirstNode, int passedSecondNode) {
+template <typename T>
+bool Graph<T>::adjacent(int passedFirstNode, int passedSecondNode) {
 	if (validateEdge(passedFirstNode, passedSecondNode)) {
 		if (directed) {
 			return(Graph::edgeDefined(passedFirstNode, passedSecondNode));
@@ -102,9 +113,10 @@ bool Graph::hasEdge(int passedFirstNode, int passedSecondNode) {
 /**
  * Returns the edge weight, or EDGE_UNDEFINED if no such edge is defined.
  */
-double Graph::getEdgeWeight(int passedFirstNode, int passedSecondNode) {
+template <typename T>
+double Graph<T>::getEdgeWeight(int passedFirstNode, int passedSecondNode) {
 	if (validateEdge(passedFirstNode, passedSecondNode)) {
-		return(values[passedFirstNode][passedSecondNode]);
+		return(edgeMatrix[passedFirstNode][passedSecondNode]);
 	}
 	return EDGE_UNDEFINED;
 }
@@ -112,7 +124,8 @@ double Graph::getEdgeWeight(int passedFirstNode, int passedSecondNode) {
 /**
  * Calculates and returns the density of this Graph.
  */
-double Graph::getDensity() {
+template <typename T>
+double Graph<T>::getDensity() {
 	double effectiveEdges = edges;
 	if (!directed) {
 		effectiveEdges *= 2;
@@ -123,14 +136,16 @@ double Graph::getDensity() {
 /**
  * Returns whether this Graph is considered directed.
  */
-bool Graph::isDirected() {
+template <typename T>
+bool Graph<T>::isDirected() {
 	return directed;
 }
 
 /**
  * Returns the average weight of all the edges of this Graph.
  */
-double Graph::getAverageWeight() {
+template <typename T>
+double Graph<T>::getAverageWeight() {
 	return (edgeSum / vertices);
 }
 
@@ -141,7 +156,8 @@ double Graph::getAverageWeight() {
  *
  * If the Graph is directed, adds an edge in the direction passedFirstNode->passedSecondNode.
  */
-void Graph::addEdge(int passedFirstNode, int passedSecondNode, double passedEdgeWeight) {
+template <typename T>
+void Graph<T>::addEdge(int passedFirstNode, int passedSecondNode, double passedEdgeWeight) {
 	if(Graph::validateEdge(passedFirstNode, passedSecondNode)) {
 		Graph::setEdge(passedFirstNode, passedSecondNode, passedEdgeWeight);
 		edges += 1;
@@ -154,7 +170,8 @@ void Graph::addEdge(int passedFirstNode, int passedSecondNode, double passedEdge
  *
  * If the Graph is directed, adds an edge in the direction passedFirstNode->passedSecondNode.
  */
-void Graph::addEdge(int passedFirstNode, int passedSecondNode) {
+template <typename T>
+void Graph<T>::addEdge(int passedFirstNode, int passedSecondNode) {
 	Graph::addEdge(passedFirstNode, passedSecondNode, 1);
 }
 
@@ -163,9 +180,10 @@ void Graph::addEdge(int passedFirstNode, int passedSecondNode) {
  *
  * If the Graph is directed, removes the edge in the direction passedFirstNode->passedSecondNode.
  */
-void Graph::removeEdge(int passedFirstNode, int passedSecondNode) {
+template <typename T>
+void Graph<T>::removeEdge(int passedFirstNode, int passedSecondNode) {
 	if(Graph::validateEdge(passedFirstNode, passedSecondNode)) {
-		double weight = values[passedFirstNode][passedSecondNode];
+		double weight = edgeMatrix[passedFirstNode][passedSecondNode];
 		Graph::setEdge(passedFirstNode, passedSecondNode, EDGE_UNDEFINED);
 		edges -= 1;
 		edgeSum -= weight;
