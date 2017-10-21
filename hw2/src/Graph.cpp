@@ -26,8 +26,11 @@ Graph::Graph(int passedNodeQuantity, bool passedIsDirected) {
 	directed = passedIsDirected;
 	vertices = 0;
 	edges = 0;
-	values = new double[passedNodeQuantity][passedNodeQuantity];
+	values = new double* [passedNodeQuantity];
+
+	// Initialize "dynamic" 2D array
 	for(int ii = 0; ii < passedNodeQuantity; ii += 1) {
+		values[ii] = new double[passedNodeQuantity];
 		for (int jj = 0; jj < passedNodeQuantity; jj += 1) {
 			values[ii][jj] = EDGE_UNDEFINED;
 		}
@@ -157,4 +160,3 @@ void Graph::removeEdge(int passedFirstNode, int passedSecondNode) {
 		Graph::setEdge(passedFirstNode, passedSecondNode, EDGE_UNDEFINED);
 	}
 }
-
