@@ -16,6 +16,7 @@
 class Graph {
 private:
 	// Internal Methods
+	double edgeSum;
 	bool validateIndex(int);
 	bool validateEdge(int, int);
 	bool edgeDefined(int, int);
@@ -37,6 +38,7 @@ public:
 	double getEdgeWeight(int, int);
 	double getDensity();
 	bool isDirected();
+	double getAverageWeight();
 
 	// Manipulators
 	void addEdge(int, int, double);

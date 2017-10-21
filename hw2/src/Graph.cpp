@@ -25,6 +25,7 @@
 Graph::Graph(int passedNodeQuantity, bool passedIsDirected) {
 	directed = passedIsDirected;
 	vertices = passedNodeQuantity;
+	edgeSum = 0;
 	edges = 0;
 	values = new double* [passedNodeQuantity];
 
@@ -51,7 +52,7 @@ bool Graph::validateIndex(int passedIndex) {
 }
 
 bool Graph::validateEdge(int passedFirstIndex, int passedSecondIndex) {
-	return(Graph::validateIndex(passedFirstIndex) && Graph::validateIndex(passedSecondIndex));
+	return(Graph::validateIndex(passedFirstIndex) && Graph::validateIndex(passedSecondIndex) && Graph::edgeDefined(passedFirstIndex, passedSecondIndex));
 }
 
 bool Graph::edgeDefined(int passedFirstIndex, int passedSecondIndex) {
@@ -126,6 +127,13 @@ bool Graph::isDirected() {
 	return directed;
 }
 
+/**
+ * Returns the average weight of all the edges of this Graph.
+ */
+double Graph::getAverageWeight() {
+	return (edgeSum / vertices);
+}
+
 /* Manipulators */
 
 /**
@@ -137,6 +145,7 @@ void Graph::addEdge(int passedFirstNode, int passedSecondNode, double passedEdge
 	if(Graph::validateEdge(passedFirstNode, passedSecondNode)) {
 		Graph::setEdge(passedFirstNode, passedSecondNode, passedEdgeWeight);
 		edges += 1;
+		edgeSum += passedEdgeWeight;
 	}
 }
 
@@ -156,7 +165,9 @@ void Graph::addEdge(int passedFirstNode, int passedSecondNode) {
  */
 void Graph::removeEdge(int passedFirstNode, int passedSecondNode) {
 	if(Graph::validateEdge(passedFirstNode, passedSecondNode)) {
+		double weight = values[passedFirstNode][passedSecondNode];
 		Graph::setEdge(passedFirstNode, passedSecondNode, EDGE_UNDEFINED);
 		edges -= 1;
+		edgeSum -= weight;
 	}
 }
