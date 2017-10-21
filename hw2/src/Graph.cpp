@@ -30,6 +30,14 @@ void Graph<T>::init(int passedNodeQuantity, bool passedIsDirected) {
 	edges = 0;
 	edgeMatrix = new double*[passedNodeQuantity];
 	nodeValues = new T[passedNodeQuantity];
+
+	// Initialize "dynamic" 2D array
+	for (int ii = 0; ii < passedNodeQuantity; ii += 1) {
+		edgeMatrix[ii] = new double[passedNodeQuantity];
+		for (int jj = 0; jj < passedNodeQuantity; jj += 1) {
+			edgeMatrix[ii][jj] = EDGE_UNDEFINED;
+		}
+	}
 }
 
 template <typename T>
@@ -49,14 +57,6 @@ Graph<T>::Graph(int passedNodeQuantity, bool passedIsDirected, T passedNodeArray
 	if (passedNodeArray) {
 		for (int ii = 0; ii < passedNodeQuantity; ii += 1) {
 			nodeValues[ii] = passedNodeArray[ii];
-		}
-	}
-
-	// Initialize "dynamic" 2D array
-	for (int ii = 0; ii < passedNodeQuantity; ii += 1) {
-		edgeMatrix[ii] = new double[passedNodeQuantity];
-		for (int jj = 0; jj < passedNodeQuantity; jj += 1) {
-			edgeMatrix[ii][jj] = EDGE_UNDEFINED;
 		}
 	}
 }
