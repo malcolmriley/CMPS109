@@ -37,6 +37,7 @@ void printPath(vector<int>, Graph<T>);
 double getRandomDouble(double, double);
 
 int main(int passedArgumentCount, char* passedArguments[]) {
+	// TODO: Switch to file output type
 	if (passedArgumentCount < 2) {
 		cout << ERROR_INVALID_ARGUMENT << endl << "Syntax: dijkstra [quantity] [density] [printgraph]" << endl;
 		cout << "\tWhere \"quantity\" is an integer quantity of nodes to generate, and \"density\" is a floating-point value representing the target graph density." << endl;
