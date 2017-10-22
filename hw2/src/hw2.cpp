@@ -33,8 +33,9 @@ vector<int> dijkstraPath(Graph<T>);
 template <typename T>
 void printGraph(Graph<T>);
 template <typename T>
-void printPath(vector<int> passedVector, Graph<T> passedPathWeight);
+void printPath(vector<int>, Graph<T>);
 double getRandomDouble(double, double);
+template <typename T>
 
 int main(int passedArgumentCount, char* passedArguments[]) {
 	if (passedArgumentCount < 2) {
@@ -109,7 +110,17 @@ vector<int> dijkstraPath(Graph<T> passedGraph) {
  */
 template <typename T>
 void printGraph(Graph<T> passedGraph) {
-
+	if (passedGraph.getVertexCount() > 0) {
+		for (int ii = 0; ii < passedGraph.getVertexCount(); ii += 1) {
+			cout << "Node " << ii << " is adjacent to: " << endl << "\t";
+			for (int jj = 0; jj < passedGraph.getVertexCount(); jj += 1) {
+				if (passedGraph.adjacent(ii, jj)) {
+					cout << jj << " ";
+				}
+			}
+			cout << endl << endl;
+		}
+	}
 }
 
 /**
