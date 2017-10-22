@@ -35,7 +35,6 @@ void printGraph(Graph<T>);
 template <typename T>
 void printPath(vector<int>, Graph<T>);
 double getRandomDouble(double, double);
-template <typename T>
 
 int main(int passedArgumentCount, char* passedArguments[]) {
 	if (passedArgumentCount < 2) {
@@ -48,7 +47,7 @@ int main(int passedArgumentCount, char* passedArguments[]) {
 		int nodes = atoi(passedArguments[1]); // Parse number of nodes from command line
 		double density = strtod(passedArguments[2], nullptr); // Parse density target from command line
 		string arg3 = string(passedArguments[3]);
-		bool printGraph = ((arg3.compare("y") == 0) || (arg3.compare("Y") == 0)); // Parse optional argument to print graph
+		bool print = ((arg3.compare("y") == 0) || (arg3.compare("Y") == 0)); // Parse optional argument to print graph
 		if (nodes <= 0) {
 			cout << ERROR_INVALID_ARGUMENT << endl;
 			cout << "No paths available through a graph containing no vertices!" << endl;
@@ -62,10 +61,10 @@ int main(int passedArgumentCount, char* passedArguments[]) {
 
 		// Initialize and print graph
 		cout << "Initializing graph with " << nodes << " vertices and intended density " << density << "." << endl;
-		Graph<double> graph = new Graph<double>(nodes, false);
+		Graph<double> graph = Graph<double>(nodes, false);
 		populateGraph(graph, density);
 		cout << "Graph initialized: " << nodes << " nodes, density " << graph.getDensity();
-		if (printGraph) {
+		if (print) {
 			cout << ":" << endl << endl;
 			printGraph(graph);
 		}
@@ -102,7 +101,8 @@ void populateGraph(Graph<T> passedGraph, double passedTargetDensity) {
  */
 template <typename T>
 vector<int> dijkstraPath(Graph<T> passedGraph) {
-	vector<int> vector = new vector<int>(passedGraph.getEdgeCount());
+	vector<int> path = vector<int>();
+	return path;
 }
 
 /**
