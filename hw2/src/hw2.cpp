@@ -42,18 +42,19 @@ int main(int passedArgumentCount, char* passedArguments[]) {
 	// TODO: Switch to file output type
 	if (passedArgumentCount < 3) {
 		cout << ERROR_INVALID_ARGUMENT << endl << "Syntax: dijkstra [outputfile] [quantity] [density] [printgraph]" << endl;
-		cout << "\tWhere \"outputfile\" is the path to the output file, \"quantity\" is an integer quantity of nodes to generate, and \"density\" is a floating-point value representing the target graph density." << endl;
+		cout << "\tWhere \"outputfile\" is the path to the output file, \"quantity\" is an integer quantity of vertices to generate, and \"density\" is a floating-point value representing the target graph density." << endl;
 		cout << "\tOptional parameter [printgraph] indicates whether the graph should be printed before calculating the path - \"y\" for yes, all else for no." << endl;
 		cout << "If the output file is unreachable, undefined, or otherwise inaccessible to the program, it will print to the console instead." << endl;
 	}
 	else {
 		// Parse and validate command line arguments
 		string filename = string(passedArguments[1]);
-		int nodes = atoi(passedArguments[2]); // Parse number of nodes from command line
+		int vertices = atoi(passedArguments[2]); // Parse number of vertices from command line
 		double density = strtod(passedArguments[3], nullptr); // Parse density target from command line
+		double maxDensity = 3;
 		string arg3 = string(passedArguments[4]);
 		bool print = ((arg3.compare("y") == 0) || (arg3.compare("Y") == 0)); // Parse optional argument to print graph
-		if (nodes <= 0) {
+		if (vertices <= 0) {
 			cout << ERROR_INVALID_ARGUMENT << endl;
 			cout << "No paths available through a graph containing no vertices!" << endl;
 			return 1;
@@ -63,12 +64,17 @@ int main(int passedArgumentCount, char* passedArguments[]) {
 			cout << "Density must be positive." << endl;
 			return 1;
 		}
+		if (density > maxDensity) {
+			cout << ERROR_INVALID_ARGUMENT << endl;
+			cout << "Density may not exceed " << maxDensity << " for a graph of " << vertices << " vertices; setting target density to " << maxDensity << endl;
+			density = 1;
+		}
 
 		// Initialize and print graph
-		cout << "Initializing graph with " << nodes << " vertices and intended density " << density << "." << endl;
-		Graph<double> graph = Graph<double>(nodes, false);
+		cout << "Initializing graph with " << vertices << " vertices and intended density " << density << "." << endl;
+		Graph<double> graph = Graph<double>(vertices, false);
 		populateGraph(graph, density);
-		cout << "Graph initialized: " << nodes << " nodes, density " << graph.getDensity();
+		cout << "Graph initialized: " << vertices << " vertices, density " << graph.getDensity();
 		if (print) {
 			cout << ":" << endl << endl;
 			printGraph(graph);
@@ -97,12 +103,40 @@ int main(int passedArgumentCount, char* passedArguments[]) {
  */
 template<typename T>
 void populateGraph(Graph<T> passedGraph, double passedTargetDensity) {
-	double minimumDensity = (passedGraph.getVertexCount() - 1) / passedGraph.getVertexCount();
+	int quantityVertices = passedGraph.getVertexCount();
+	double minimumDensity = (quantityVertices - 1) / quantityVertices;
 	if (minimumDensity < passedTargetDensity) {
-		cout << "Warning: Minimum density for a connected graph with " << passedGraph.getVertexCount() << " nodes is: " << minimumDensity << endl;
+		cout << "Warning: Minimum density for a connected graph with " << quantityVertices << " vertices is: " << minimumDensity << endl;
 		cout << "This will be the final density of the graph instead of " << passedTargetDensity;
 	}
-	// TODO:
+
+	// Establish minimum connected graph by walking between all vertices
+	vector<int> vertexList = vector<int>();
+	vector<int> unvisited = vector<int>();
+	for (int ii = 0; ii < quantityVertices; ii += 1) {
+		vertexList.push_back(ii);
+	}
+	while(unvisited.size() < quantityVertices) {
+		int index = getRandomInteger(0, (vertexList.size() - 1));
+		int value = vertexList.at(index);
+		unvisited.push_back(value);
+		vertexList.erase(vertexList.begin() + index);
+	}
+	for (int ii = 0; ii < (quantityVertices - 1); ii += 1) {
+		int first = unvisited.at(ii);
+		int second = unvisited.at(ii + 1);
+		passedGraph.addEdge(first, second);
+	}
+
+	// Add random edges until density requirement is satisfied
+	while (passedGraph.getDensity() < passedTargetDensity) {
+		int first = getRandomInteger(0, quantityVertices - 1);
+		int second = getRandomInteger(0, quantityVertices - 1);
+		while (first == second) {
+			second = getRandomInteger(0, quantityVertices - 1);
+		}
+		passedGraph.addEdge(first, second);
+	}
 }
 
 /**
@@ -123,7 +157,7 @@ template <typename T>
 void printGraph(Graph<T> passedGraph) {
 	if (passedGraph.getVertexCount() > 0) {
 		for (int ii = 0; ii < passedGraph.getVertexCount(); ii += 1) {
-			cout << "Node " << ii << " is adjacent to: " << endl << "\t";
+			cout << "Vertex " << ii << " is adjacent to: " << endl << "\t";
 			for (int jj = 0; jj < passedGraph.getVertexCount(); jj += 1) {
 				if (passedGraph.adjacent(ii, jj)) {
 					cout << jj << " ";
@@ -148,7 +182,7 @@ void printPath(vector<int> passedVector, Graph<T> passedGraph) {
 }
 
 /**
- * Retrieves a random double in the passed range
+ * Retrieves a random double in the passed range, inclusive
  */
 double getRandomDouble(double passedLowerBound, double passedUpperBound) {
 	double value = ((double)rand()) / RAND_MAX;
@@ -156,7 +190,7 @@ double getRandomDouble(double passedLowerBound, double passedUpperBound) {
 }
 
 /**
- * Returns a random integer in the passed range
+ * Returns a random integer in the passed range, inclusive
  */
 int getRandomInteger(int passedLowerBound, int passedUpperBound) {
 	return (rand() % (passedUpperBound - passedLowerBound + 1)) + passedLowerBound;
