@@ -35,20 +35,23 @@ void printGraph(Graph<T>);
 template <typename T>
 void printPath(vector<int>, Graph<T>);
 double getRandomDouble(double, double);
+int getRandomInteger(int, int);
 
 int main(int passedArgumentCount, char* passedArguments[]) {
 	srand(time(NULL));
 	// TODO: Switch to file output type
-	if (passedArgumentCount < 2) {
-		cout << ERROR_INVALID_ARGUMENT << endl << "Syntax: dijkstra [quantity] [density] [printgraph]" << endl;
-		cout << "\tWhere \"quantity\" is an integer quantity of nodes to generate, and \"density\" is a floating-point value representing the target graph density." << endl;
+	if (passedArgumentCount < 3) {
+		cout << ERROR_INVALID_ARGUMENT << endl << "Syntax: dijkstra [outputfile] [quantity] [density] [printgraph]" << endl;
+		cout << "\tWhere \"outputfile\" is the path to the output file, \"quantity\" is an integer quantity of nodes to generate, and \"density\" is a floating-point value representing the target graph density." << endl;
 		cout << "\tOptional parameter [printgraph] indicates whether the graph should be printed before calculating the path - \"y\" for yes, all else for no." << endl;
+		cout << "If the output file is unreachable, undefined, or otherwise inaccessible to the program, it will print to the console instead." << endl;
 	}
 	else {
 		// Parse and validate command line arguments
-		int nodes = atoi(passedArguments[1]); // Parse number of nodes from command line
-		double density = strtod(passedArguments[2], nullptr); // Parse density target from command line
-		string arg3 = string(passedArguments[3]);
+		string filename = string(passedArguments[1]);
+		int nodes = atoi(passedArguments[2]); // Parse number of nodes from command line
+		double density = strtod(passedArguments[3], nullptr); // Parse density target from command line
+		string arg3 = string(passedArguments[4]);
 		bool print = ((arg3.compare("y") == 0) || (arg3.compare("Y") == 0)); // Parse optional argument to print graph
 		if (nodes <= 0) {
 			cout << ERROR_INVALID_ARGUMENT << endl;
@@ -145,4 +148,11 @@ void printPath(vector<int> passedVector, Graph<T> passedGraph) {
 double getRandomDouble(double passedLowerBound, double passedUpperBound) {
 	double value = ((double)rand()) / RAND_MAX;
 	return passedLowerBound + (value * (passedUpperBound - passedLowerBound));
+}
+
+/**
+ * Returns a random integer in the passed range
+ */
+int getRandomInteger(int passedLowerBound, int passedUpperBound) {
+	return (rand() % (passedUpperBound - passedLowerBound + 1)) + passedLowerBound;
 }
