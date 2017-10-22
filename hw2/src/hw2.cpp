@@ -97,6 +97,11 @@ int main(int passedArgumentCount, char* passedArguments[]) {
  */
 template<typename T>
 void populateGraph(Graph<T> passedGraph, double passedTargetDensity) {
+	double minimumDensity = (passedGraph.getVertexCount() - 1) / passedGraph.getVertexCount();
+	if (minimumDensity < passedTargetDensity) {
+		cout << "Warning: Minimum density for a connected graph with " << passedGraph.getVertexCount() << " nodes is: " << minimumDensity << endl;
+		cout << "This will be the final density of the graph instead of " << passedTargetDensity;
+	}
 	// TODO:
 }
 
