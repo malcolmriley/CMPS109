@@ -37,6 +37,7 @@ void printPath(vector<int>, Graph<T>);
 double getRandomDouble(double, double);
 
 int main(int passedArgumentCount, char* passedArguments[]) {
+	srand(time(NULL));
 	// TODO: Switch to file output type
 	if (passedArgumentCount < 2) {
 		cout << ERROR_INVALID_ARGUMENT << endl << "Syntax: dijkstra [quantity] [density] [printgraph]" << endl;
@@ -142,7 +143,6 @@ void printPath(vector<int> passedVector, Graph<T> passedGraph) {
  * Retrieves a random double in the passed range
  */
 double getRandomDouble(double passedLowerBound, double passedUpperBound) {
-	srand(time(NULL));
 	double value = ((double)rand()) / RAND_MAX;
 	return passedLowerBound + (value * (passedUpperBound - passedLowerBound));
 }
