@@ -42,15 +42,11 @@ struct Node {
 /* Function Declarations */
 template<typename T>
 void populateGraph(Graph<T>*, double);
-
 vector<int> dijkstraPath(Graph<Node>*, int, int);
-
 template<typename T>
 void printGraph(Graph<T>*, ostream*);
-
 template<typename T>
 void printPath(vector<int>*, Graph<T>*, ostream*);
-
 double getRandomDouble(double, double);
 int getRandomInteger(int, int);
 template<typename T>
