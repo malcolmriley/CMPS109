@@ -138,10 +138,10 @@ int main() {
 template<typename T>
 void populateGraph(Graph<T>* passedGraph, double passedTargetDensity) {
 	double quantityVertices = (*passedGraph).getVertexCount();
-	double minimumDensity = (quantityVertices - 1) / quantityVertices;
-	if (minimumDensity < passedTargetDensity) {
+	double minimumDensity = 1 / quantityVertices;
+	if (passedTargetDensity < minimumDensity) {
 		cout << "Warning: Minimum density for a connected graph with " << quantityVertices << " vertices is: " << minimumDensity << endl;
-		cout << "This will be the final density of the graph instead of " << passedTargetDensity;
+		cout << "This will be the final density of the graph instead of " << passedTargetDensity << endl;
 	}
 
 	// Establish minimum connected graph by walking between all vertices
@@ -225,7 +225,7 @@ void printGraph(Graph<T>* passedGraph, ostream* passedStream) {
 					(*passedStream) << jj << " ";
 				}
 			}
-			(*passedStream) << " )" << endl;
+			(*passedStream) << ")" << endl;
 		}
 		(*passedStream) << endl;
 	}
@@ -256,8 +256,7 @@ double getRandomDouble(double passedLowerBound, double passedUpperBound) {
  * Returns a random integer in the passed range, inclusive
  */
 int getRandomInteger(int passedLowerBound, int passedUpperBound) {
-	return (rand() % (passedUpperBound - passedLowerBound + 1))
-			+ passedLowerBound;
+	return (rand() % (passedUpperBound - passedLowerBound + 1)) + passedLowerBound;
 }
 
 /**
