@@ -161,7 +161,7 @@ int Graph<T>::getEdgeCount() {
  */
 template <typename T>
 bool Graph<T>::adjacent(int passedFirstVertex, int passedSecondVertex) {
-	if (validateEdge(passedFirstVertex, passedSecondVertex)) {
+	if (Graph::validateIndex(passedFirstVertex) && Graph::validateIndex(passedSecondVertex)) {
 		if (directed) {
 			return(Graph::edgeDefined(passedFirstVertex, passedSecondVertex));
 		}
