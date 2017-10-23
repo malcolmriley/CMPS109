@@ -25,6 +25,7 @@
 using namespace std;
 
 #define ERROR_INVALID_ARGUMENT "ERROR: Invalid argument."
+#define SIMPLE_PROMPT "> "
 
 
 /* Node Definition */
@@ -70,7 +71,7 @@ int main() {
 	while (vertices <= 0) {
 		cout << ERROR_INVALID_ARGUMENT << endl;
 		cout << "No paths available through a graph containing no vertices!" << endl;
-		getParameter("> ", &vertices);
+		getParameter(SIMPLE_PROMPT, &vertices);
 	}
 
 	// Get target density
@@ -94,7 +95,7 @@ int main() {
 	while(filename.size() <= 0) {
 		cout << ERROR_INVALID_ARGUMENT << endl;
 		cout << "Please enter a valid filename.";
-		getParameter("> ", &filename);
+		getParameter(SIMPLE_PROMPT, &filename);
 	}
 	ofstream file;
 	file.open(filename);
@@ -267,6 +268,6 @@ int getRandomInteger(int passedLowerBound, int passedUpperBound) {
  */
 template<typename T>
 void getParameter(string passedString, T* passedType) {
-	cout << passedString << endl << "> ";
+	cout << passedString << endl << SIMPLE_PROMPT;
 	cin >> *passedType;
 }
