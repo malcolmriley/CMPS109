@@ -163,7 +163,7 @@ void populateGraph(Graph<T>* passedGraph, double passedTargetDensity) {
 		 * TODO:
 		 * Future iterations could have a configurable value for edgeWeight.
 		 */
-		double edgeWeight = getRandomDouble(0, 5);
+		double edgeWeight = getRandomDouble(0.001, 5.000);
 		(*passedGraph).addEdge(first, second, edgeWeight);
 	}
 
@@ -189,13 +189,10 @@ vector<int> dijkstraPath(Graph<Node>* passedGraph, int passedStartVertex, int pa
 	// Begin algorithm proper
 	while (unvisited.size() > 0) {
 		int currentVertex = unvisited.at(unvisited.size() - 1);
-		for (int iteratedVertex = 0;
-				iteratedVertex < (*passedGraph).getVertexCount(); iteratedVertex +=
-						1) {
+		for (int iteratedVertex = 0; iteratedVertex < (*passedGraph).getVertexCount(); iteratedVertex += 1) {
 			Node* vertex = (*passedGraph).getVertex(iteratedVertex);
 			if ((*passedGraph).adjacent(currentVertex, iteratedVertex)) {
-				double traversalCost = (*passedGraph).getEdgeWeight(currentVertex,
-						iteratedVertex) + (*vertex).weight;
+				double traversalCost = (*passedGraph).getEdgeWeight(currentVertex, iteratedVertex) + (*vertex).weight;
 				if (traversalCost < (*vertex).weight) {
 					(*vertex).weight = traversalCost;
 					(*vertex).predecessor = currentVertex;
@@ -222,13 +219,13 @@ template<typename T>
 void printGraph(Graph<T>* passedGraph, ostream* passedStream) {
 	if ((*passedGraph).getVertexCount() > 0) {
 		for (int ii = 0; ii < (*passedGraph).getVertexCount(); ii += 1) {
-			(*passedStream) << "Vertex " << ii << " is adjacent to: " << endl << "\t";
+			(*passedStream) << "Vertex " << ii << " is adjacent to: " << endl << "\t( ";
 			for (int jj = 0; jj < (*passedGraph).getVertexCount(); jj += 1) {
 				if ((*passedGraph).adjacent(ii, jj)) {
 					(*passedStream) << jj << " ";
 				}
 			}
-			(*passedStream) << endl;
+			(*passedStream) << " )" << endl;
 		}
 		(*passedStream) << endl;
 	}
