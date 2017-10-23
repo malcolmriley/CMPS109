@@ -197,8 +197,6 @@ void populateGraph(Graph<T>* passedGraph, double passedTargetDensity) {
 /**
  * Calculates the shortest path through the Graph, using Dijkstra's Algorithm, returning
  * the result as an ordered sequence of entries in a vector.
- *
- * Vector is returned in reverse order.
  */
 void dijkstraPath(Graph<Node>* passedGraph, vector<int>* passedPathVector, int passedStartVertex, int passedEndVertex) {
 	cout << "Calculating path from vertex " << passedStartVertex << " to vertex " << passedEndVertex << "..." << endl;
@@ -270,7 +268,7 @@ void printPath(vector<int>* passedVector, Graph<T>* passedGraph, ostream* passed
 		(*passedStream) << "Found path: (" << passedVector->at(0) << " to " << passedVector->at(passedVector->size() - 1) << ")" << endl;
 		double pathWeight = 0;
 		(*passedStream) << passedVector->at(0);
-		for (int ii = (passedVector->size() - 1); ii >= 0; ii -= 1) {
+		for (int ii = 1; ii < passedVector->size(); ii += 1) {
 			(*passedStream) << " -> " << passedVector->at(ii);
 			pathWeight += passedGraph->getEdgeWeight(passedVector->at(ii - 1), passedVector->at(ii));
 		}
