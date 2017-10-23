@@ -14,86 +14,125 @@
  *********************************************************************/
 
 #include <cstdlib>
+#include <fstream>
 #include <ctime>
 #include <iostream>
+#include <iterator>
+#include <limits>
 #include <string>
 #include <vector>
 
 #include "Graph.h"
 
 #define ERROR_INVALID_ARGUMENT "ERROR: Invalid argument."
+#define INFINITE_DOUBLE std::numeric_limits<double>::max()
 
 using namespace std;
 
+/* Node Definition */
+struct Node {
+	double weight;
+	int predecessor;
+
+	Node() {
+		weight = INFINITE_DOUBLE;
+		predecessor = -1;
+	}
+};
+
 /* Function Declarations */
-template <typename T>
-void populateGraph(Graph<T>, double);
-template <typename T>
-vector<int> dijkstraPath(Graph<T>);
-template <typename T>
-void printGraph(Graph<T>);
-template <typename T>
-void printPath(vector<int>, Graph<T>);
+template<typename T>
+void populateGraph(Graph<T>*, double);
+
+vector<int> dijkstraPath(Graph<Node>*, int, int);
+
+template<typename T>
+void printGraph(Graph<T>*, ostream*);
+
+template<typename T>
+void printPath(vector<int>*, Graph<T>*, ostream*);
+
 double getRandomDouble(double, double);
 int getRandomInteger(int, int);
+template<typename T>
+void getParameter(string, T*);
 
-int main(int passedArgumentCount, char* passedArguments[]) {
+int main() {
 	srand(time(NULL));
-	// TODO: Switch to file output type
-	if (passedArgumentCount < 3) {
-		cout << ERROR_INVALID_ARGUMENT << endl << "Syntax: dijkstra [outputfile] [quantity] [density] [printgraph]" << endl;
-		cout << "\tWhere \"outputfile\" is the path to the output file, \"quantity\" is an integer quantity of vertices to generate, and \"density\" is a floating-point value representing the target graph density." << endl;
-		cout << "\tOptional parameter [printgraph] indicates whether the graph should be printed before calculating the path - \"y\" for yes, all else for no." << endl;
-		cout << "If the output file is unreachable, undefined, or otherwise inaccessible to the program, it will print to the console instead." << endl;
+	// Parse and validate command line arguments
+	string filename;
+	int vertices;
+	double density;
+	char printout;
+
+	/**
+	 * TODO:
+	 * This is the maximal density of a simple undirected graph. For future iterations that supports other graph types, this will be a value calculated by the program.
+	 */
+	double maxDensity = 1;
+
+	// Get number of vertices
+	getParameter("Enter the number of vertices the graph should have: ", &vertices);
+	while (vertices <= 0) {
+		cout << ERROR_INVALID_ARGUMENT << endl;
+		cout << "No paths available through a graph containing no vertices!" << endl;
+		getParameter("> ", &vertices);
+	}
+
+	// Get target density
+	getParameter("Enter the target density of the graph: ", &density);
+	while (density < 0) {
+		cout << ERROR_INVALID_ARGUMENT << endl;
+		cout << "Density must be positive." << endl;
+	}
+	if (density > maxDensity) {
+		cout << ERROR_INVALID_ARGUMENT << endl;
+		cout << "Density may not exceed " << maxDensity << " for a graph of " << vertices << " vertices; setting target density to " << maxDensity << endl;
+		density = maxDensity;
+	}
+
+	// Get whether the graph should print out
+	getParameter("Print graph representation to command line? (y/n)", &printout);
+	bool print = (printout == 'y') || (printout == 'Y');
+
+	// Get filename
+	getParameter("Enter the file name for the program output: ", &filename);
+	while(filename.size() <= 0) {
+		cout << ERROR_INVALID_ARGUMENT << endl;
+		cout << "Please enter a valid filename.";
+		getParameter("> ", &filename);
+	}
+	ofstream file;
+	file.open(filename);
+
+	// Initialize and print graph
+	cout << "Initializing graph with " << vertices << " vertices and intended density " << density << "." << endl;
+	Graph<Node> graph = Graph<Node>(vertices, false);
+	populateGraph(&graph, density);
+	cout << "Graph initialized: " << vertices << " vertices, density " << graph.getDensity();
+	if (print) {
+		cout << ":" << endl << endl;
+		printGraph(&graph, &cout);
+		printGraph(&graph, &file);
 	}
 	else {
-		// Parse and validate command line arguments
-		string filename = string(passedArguments[1]);
-		int vertices = atoi(passedArguments[2]); // Parse number of vertices from command line
-		double density = strtod(passedArguments[3], nullptr); // Parse density target from command line
-		double maxDensity = 3;
-		string arg3 = string(passedArguments[4]);
-		bool print = ((arg3.compare("y") == 0) || (arg3.compare("Y") == 0)); // Parse optional argument to print graph
-		if (vertices <= 0) {
-			cout << ERROR_INVALID_ARGUMENT << endl;
-			cout << "No paths available through a graph containing no vertices!" << endl;
-			return 1;
-		}
-		if (density < 0) {
-			cout << ERROR_INVALID_ARGUMENT << endl;
-			cout << "Density must be positive." << endl;
-			return 1;
-		}
-		if (density > maxDensity) {
-			cout << ERROR_INVALID_ARGUMENT << endl;
-			cout << "Density may not exceed " << maxDensity << " for a graph of " << vertices << " vertices; setting target density to " << maxDensity << endl;
-			density = 1;
-		}
-
-		// Initialize and print graph
-		cout << "Initializing graph with " << vertices << " vertices and intended density " << density << "." << endl;
-		Graph<double> graph = Graph<double>(vertices, false);
-		populateGraph(graph, density);
-		cout << "Graph initialized: " << vertices << " vertices, density " << graph.getDensity();
-		if (print) {
-			cout << ":" << endl << endl;
-			printGraph(graph);
-		}
-		else {
-			cout << "." << endl;
-		}
-		cout << endl;
-
-		// Calculate path
-		cout << "Calculating path..." << endl;
-		vector<int> path = dijkstraPath(graph);
-		cout << "Found path: " << endl;
-		printPath(path, graph);
-		cout << endl;
-
+		cout << "." << endl;
 	}
+	cout << endl;
+
+	// Calculate path
+	int start = getRandomInteger(0, (vertices - 1));
+	int end = getRandomInteger(0, (vertices - 1));
+	cout << "Calculating path from vertex " << start << " to vertex " << end << "..." << endl;
+	vector<int> path = dijkstraPath(&graph, start, end);
+	cout << "Found path: " << endl;
+	printPath(&path, &graph, &cout);
+	printPath(&path, &graph, &file);
+	cout << endl;
+
 	// Complete!
 	cout << "Program terminated." << endl;
+	file.close();
 	return 0;
 }
 
@@ -102,8 +141,8 @@ int main(int passedArgumentCount, char* passedArguments[]) {
  * indicated target density.
  */
 template<typename T>
-void populateGraph(Graph<T> passedGraph, double passedTargetDensity) {
-	int quantityVertices = passedGraph.getVertexCount();
+void populateGraph(Graph<T>* passedGraph, double passedTargetDensity) {
+	double quantityVertices = (*passedGraph).getVertexCount();
 	double minimumDensity = (quantityVertices - 1) / quantityVertices;
 	if (minimumDensity < passedTargetDensity) {
 		cout << "Warning: Minimum density for a connected graph with " << quantityVertices << " vertices is: " << minimumDensity << endl;
@@ -116,7 +155,7 @@ void populateGraph(Graph<T> passedGraph, double passedTargetDensity) {
 	for (int ii = 0; ii < quantityVertices; ii += 1) {
 		vertexList.push_back(ii);
 	}
-	while(unvisited.size() < quantityVertices) {
+	while (vertexList.size() > 0) {
 		int index = getRandomInteger(0, (vertexList.size() - 1));
 		int value = vertexList.at(index);
 		unvisited.push_back(value);
@@ -125,17 +164,19 @@ void populateGraph(Graph<T> passedGraph, double passedTargetDensity) {
 	for (int ii = 0; ii < (quantityVertices - 1); ii += 1) {
 		int first = unvisited.at(ii);
 		int second = unvisited.at(ii + 1);
-		passedGraph.addEdge(first, second);
+		/**
+		 * TODO:
+		 * Future iterations could have a configurable value for edgeWeight.
+		 */
+		double edgeWeight = getRandomDouble(0, 5);
+		(*passedGraph).addEdge(first, second, edgeWeight);
 	}
 
 	// Add random edges until density requirement is satisfied
-	while (passedGraph.getDensity() < passedTargetDensity) {
+	while ((*passedGraph).getDensity() < passedTargetDensity) {
 		int first = getRandomInteger(0, quantityVertices - 1);
 		int second = getRandomInteger(0, quantityVertices - 1);
-		while (first == second) {
-			second = getRandomInteger(0, quantityVertices - 1);
-		}
-		passedGraph.addEdge(first, second);
+		(*passedGraph).addEdge(first, second);
 	}
 }
 
@@ -143,40 +184,70 @@ void populateGraph(Graph<T> passedGraph, double passedTargetDensity) {
  * Calculates the shortest path through the Graph, using Dijkstra's Algorithm, returning
  * the result as an ordered sequence of entries in a vector.
  */
-template <typename T>
-vector<int> dijkstraPath(Graph<T> passedGraph) {
+vector<int> dijkstraPath(Graph<Node>* passedGraph, int passedStartVertex, int passedEndVertex) {
 	vector<int> path = vector<int>();
-	// TODO:
+	// Initialize starting nodes
+	(*(*passedGraph).getVertex(passedStartVertex)).weight = 0;
+	vector<int> unvisited = vector<int>();
+	unvisited.push_back(0);
+
+	// Begin algorithm proper
+	while (unvisited.size() > 0) {
+		int currentVertex = unvisited.at(unvisited.size() - 1);
+		for (int iteratedVertex = 0;
+				iteratedVertex < (*passedGraph).getVertexCount(); iteratedVertex +=
+						1) {
+			Node* vertex = (*passedGraph).getVertex(iteratedVertex);
+			if ((*passedGraph).adjacent(currentVertex, iteratedVertex)) {
+				double traversalCost = (*passedGraph).getEdgeWeight(currentVertex,
+						iteratedVertex) + (*vertex).weight;
+				if (traversalCost < (*vertex).weight) {
+					(*vertex).weight = traversalCost;
+					(*vertex).predecessor = currentVertex;
+				}
+				unvisited.push_back(iteratedVertex);
+			}
+			unvisited.pop_back();
+		}
+	}
+
+	// Add discovered path to path vector
+	int iteratedVertex = passedEndVertex;
+	while ((*(*passedGraph).getVertex(iteratedVertex)).predecessor >= 0) {
+		path.push_back(iteratedVertex);
+		iteratedVertex = (*(*passedGraph).getVertex(iteratedVertex)).predecessor;
+	}
 	return path;
 }
 
 /**
  * Prints a representation of the Graph to cout.
  */
-template <typename T>
-void printGraph(Graph<T> passedGraph) {
-	if (passedGraph.getVertexCount() > 0) {
-		for (int ii = 0; ii < passedGraph.getVertexCount(); ii += 1) {
-			cout << "Vertex " << ii << " is adjacent to: " << endl << "\t";
-			for (int jj = 0; jj < passedGraph.getVertexCount(); jj += 1) {
-				if (passedGraph.adjacent(ii, jj)) {
-					cout << jj << " ";
+template<typename T>
+void printGraph(Graph<T>* passedGraph, ostream* passedStream) {
+	if ((*passedGraph).getVertexCount() > 0) {
+		for (int ii = 0; ii < (*passedGraph).getVertexCount(); ii += 1) {
+			(*passedStream) << "Vertex " << ii << " is adjacent to: " << endl << "\t";
+			for (int jj = 0; jj < (*passedGraph).getVertexCount(); jj += 1) {
+				if ((*passedGraph).adjacent(ii, jj)) {
+					(*passedStream) << jj << " ";
 				}
 			}
-			cout << endl << endl;
+			(*passedStream) << endl;
 		}
+		(*passedStream) << endl;
 	}
 }
 
 /**
  * Prints the passed vector, represented as a path through a graph.
  */
-template <typename T>
-void printPath(vector<int> passedVector, Graph<T> passedGraph) {
-	if (passedVector.size() > 0) {
-		cout << passedVector.at(0);
-		for (int ii = 1; ii < passedVector.size(); ii += 1) {
-			cout << " -> " << passedVector.at(ii);
+template<typename T>
+void printPath(vector<int>* passedVector, Graph<T>* passedGraph, ostream* passedStream) {
+	if ((*passedVector).size() > 0) {
+		(*passedStream) << (*passedVector).at(0);
+		for (int ii = 1; ii < (*passedVector).size(); ii += 1) {
+			(*passedStream) << " -> " << (*passedVector).at(ii);
 		}
 	}
 }
@@ -185,7 +256,7 @@ void printPath(vector<int> passedVector, Graph<T> passedGraph) {
  * Retrieves a random double in the passed range, inclusive
  */
 double getRandomDouble(double passedLowerBound, double passedUpperBound) {
-	double value = ((double)rand()) / RAND_MAX;
+	double value = ((double) rand()) / RAND_MAX;
 	return passedLowerBound + (value * (passedUpperBound - passedLowerBound));
 }
 
@@ -193,5 +264,15 @@ double getRandomDouble(double passedLowerBound, double passedUpperBound) {
  * Returns a random integer in the passed range, inclusive
  */
 int getRandomInteger(int passedLowerBound, int passedUpperBound) {
-	return (rand() % (passedUpperBound - passedLowerBound + 1)) + passedLowerBound;
+	return (rand() % (passedUpperBound - passedLowerBound + 1))
+			+ passedLowerBound;
+}
+
+/**
+ * Returns a parameter retrieved from the command line.
+ */
+template<typename T>
+void getParameter(string passedString, T* passedType) {
+	cout << passedString << endl << "> ";
+	cin >> *passedType;
 }

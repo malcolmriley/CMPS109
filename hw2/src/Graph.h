@@ -120,7 +120,7 @@ bool Graph<T>::validateIndex(int passedIndex) {
 
 template <typename T>
 bool Graph<T>::validateEdge(int passedFirstIndex, int passedSecondIndex) {
-	return(Graph::validateIndex(passedFirstIndex) && Graph::validateIndex(passedSecondIndex) && Graph::edgeDefined(passedFirstIndex, passedSecondIndex));
+	return(Graph::validateIndex(passedFirstIndex) && Graph::validateIndex(passedSecondIndex) && !Graph::edgeDefined(passedFirstIndex, passedSecondIndex));
 }
 
 template <typename T>
