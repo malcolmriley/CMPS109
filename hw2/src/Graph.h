@@ -120,7 +120,7 @@ bool Graph<T>::validateIndex(int passedIndex) {
 
 template <typename T>
 bool Graph<T>::validateEdge(int passedFirstIndex, int passedSecondIndex) {
-	return(Graph::validateIndex(passedFirstIndex) && Graph::validateIndex(passedSecondIndex) && !Graph::edgeDefined(passedFirstIndex, passedSecondIndex));
+	return(Graph::validateIndex(passedFirstIndex) && Graph::validateIndex(passedSecondIndex));
 }
 
 template <typename T>
@@ -161,7 +161,7 @@ int Graph<T>::getEdgeCount() {
  */
 template <typename T>
 bool Graph<T>::adjacent(int passedFirstVertex, int passedSecondVertex) {
-	if (Graph::validateIndex(passedFirstVertex) && Graph::validateIndex(passedSecondVertex)) {
+	if (Graph::validateEdge(passedFirstVertex, passedSecondVertex)) {
 		if (directed) {
 			return(Graph::edgeDefined(passedFirstVertex, passedSecondVertex));
 		}
