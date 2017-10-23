@@ -137,18 +137,25 @@ int main() {
  */
 template<typename T>
 void populateGraph(Graph<T>* passedGraph, double passedTargetDensity) {
-	double quantityVertices = (*passedGraph).getVertexCount();
+	double quantityVertices = passedGraph->getVertexCount();
 	double minimumDensity = 1 / quantityVertices;
 	if (passedTargetDensity < minimumDensity) {
 		cout << "Warning: Minimum density for a connected graph with " << quantityVertices << " vertices is: " << minimumDensity << endl;
 		cout << "This will be the final density of the graph instead of " << passedTargetDensity << endl;
+		passedTargetDensity = minimumDensity;
 	}
 
 	// Establish minimum connected graph by walking between all vertices
 	vector<int> vertexList = vector<int>();
 	vector<int> unvisited = vector<int>();
+	vertexList.reserve(passedGraph->getVertexCount());
+	unvisited.reserve(passedGraph->getVertexCount());
 	for (int ii = 0; ii < quantityVertices; ii += 1) {
 		vertexList.push_back(ii);
+	}
+	cout << "vertex list: ";
+	for (int ii = 0; ii < vertexList.size(); ii += 1) {
+		cout << vertexList.at(ii) << " ";
 	}
 	while (vertexList.size() > 0) {
 		int index = getRandomInteger(0, (vertexList.size() - 1));
@@ -156,6 +163,12 @@ void populateGraph(Graph<T>* passedGraph, double passedTargetDensity) {
 		unvisited.push_back(value);
 		vertexList.erase(vertexList.begin() + index);
 	}
+	cout << endl;
+	cout << "unvisited list: ";
+	for (int ii = 0; ii < unvisited.size(); ii += 1) {
+		unvisited.at(ii);
+	}
+	cout << endl;
 	for (int ii = 0; ii < (quantityVertices - 1); ii += 1) {
 		int first = unvisited.at(ii);
 		int second = unvisited.at(ii + 1);
@@ -182,17 +195,18 @@ void populateGraph(Graph<T>* passedGraph, double passedTargetDensity) {
 vector<int> dijkstraPath(Graph<Node>* passedGraph, int passedStartVertex, int passedEndVertex) {
 	vector<int> path = vector<int>();
 	// Initialize starting nodes
-	(*(*passedGraph).getVertex(passedStartVertex)).weight = 0;
+	(*passedGraph->getVertex(passedStartVertex)).weight = 0;
 	vector<int> unvisited = vector<int>();
 	unvisited.push_back(0);
 
 	// Begin algorithm proper
 	while (unvisited.size() > 0) {
 		int currentVertex = unvisited.at(unvisited.size() - 1);
-		for (int iteratedVertex = 0; iteratedVertex < (*passedGraph).getVertexCount(); iteratedVertex += 1) {
-			Node* vertex = (*passedGraph).getVertex(iteratedVertex);
-			if ((*passedGraph).adjacent(currentVertex, iteratedVertex)) {
-				double traversalCost = (*passedGraph).getEdgeWeight(currentVertex, iteratedVertex) + (*vertex).weight;
+		for (int iteratedVertex = 0; iteratedVertex < passedGraph->getVertexCount(); iteratedVertex += 1) {
+			Node* vertex = passedGraph->getVertex(iteratedVertex);
+			if (
+passedGraph->adjacent(currentVertex, iteratedVertex)) {
+				double traversalCost = passedGraph->getEdgeWeight(currentVertex, iteratedVertex) + (*vertex).weight;
 				if (traversalCost < (*vertex).weight) {
 					(*vertex).weight = traversalCost;
 					(*vertex).predecessor = currentVertex;
@@ -205,9 +219,9 @@ vector<int> dijkstraPath(Graph<Node>* passedGraph, int passedStartVertex, int pa
 
 	// Add discovered path to path vector
 	int iteratedVertex = passedEndVertex;
-	while ((*(*passedGraph).getVertex(iteratedVertex)).predecessor >= 0) {
+	while ((*passedGraph->getVertex(iteratedVertex)).predecessor >= 0) {
 		path.push_back(iteratedVertex);
-		iteratedVertex = (*(*passedGraph).getVertex(iteratedVertex)).predecessor;
+		iteratedVertex = (*passedGraph->getVertex(iteratedVertex)).predecessor;
 	}
 	return path;
 }
@@ -217,11 +231,11 @@ vector<int> dijkstraPath(Graph<Node>* passedGraph, int passedStartVertex, int pa
  */
 template<typename T>
 void printGraph(Graph<T>* passedGraph, ostream* passedStream) {
-	if ((*passedGraph).getVertexCount() > 0) {
-		for (int ii = 0; ii < (*passedGraph).getVertexCount(); ii += 1) {
+	if (passedGraph->getVertexCount() > 0) {
+		for (int ii = 0; ii < passedGraph->getVertexCount(); ii += 1) {
 			(*passedStream) << "Vertex " << ii << " is adjacent to: " << endl << "\t( ";
-			for (int jj = 0; jj < (*passedGraph).getVertexCount(); jj += 1) {
-				if ((*passedGraph).adjacent(ii, jj)) {
+			for (int jj = 0; jj < passedGraph->getVertexCount(); jj += 1) {
+				if (passedGraph->adjacent(ii, jj)) {
 					(*passedStream) << jj << " ";
 				}
 			}
