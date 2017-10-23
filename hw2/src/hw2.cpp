@@ -42,7 +42,7 @@ struct Node {
 /* Function Declarations */
 template<typename T>
 void populateGraph(Graph<T>*, double);
-vector<int> dijkstraPath(Graph<Node>*, int, int);
+void dijkstraPath(Graph<Node>*, vector<int>*, int, int);
 template<typename T>
 void printGraph(Graph<T>*, ostream*);
 template<typename T>
@@ -153,20 +153,11 @@ void populateGraph(Graph<T>* passedGraph, double passedTargetDensity) {
 	for (int ii = 0; ii < quantityVertices; ii += 1) {
 		vertexList.push_back(ii);
 	}
-	cout << "vertex list: ";
-	for (int ii = 0; ii < vertexList.size(); ii += 1) {
-		cout << vertexList.at(ii) << " ";
-	}
 	while (vertexList.size() > 0) {
 		int index = getRandomInteger(0, (vertexList.size() - 1));
 		int value = vertexList.at(index);
 		unvisited.push_back(value);
 		vertexList.erase(vertexList.begin() + index);
-	}
-	cout << endl;
-	cout << "unvisited list: ";
-	for (int ii = 0; ii < unvisited.size(); ii += 1) {
-		unvisited.at(ii);
 	}
 	cout << endl;
 	for (int ii = 0; ii < (quantityVertices - 1); ii += 1) {
@@ -177,14 +168,14 @@ void populateGraph(Graph<T>* passedGraph, double passedTargetDensity) {
 		 * Future iterations could have a configurable value for edgeWeight.
 		 */
 		double edgeWeight = getRandomDouble(0.001, 5.000);
-		(*passedGraph).addEdge(first, second, edgeWeight);
+		passedGraph->addEdge(first, second, edgeWeight);
 	}
 
 	// Add random edges until density requirement is satisfied
-	while ((*passedGraph).getDensity() < passedTargetDensity) {
+	while (passedGraph->getDensity() < passedTargetDensity) {
 		int first = getRandomInteger(0, quantityVertices - 1);
 		int second = getRandomInteger(0, quantityVertices - 1);
-		(*passedGraph).addEdge(first, second);
+		passedGraph->addEdge(first, second);
 	}
 }
 
@@ -192,8 +183,7 @@ void populateGraph(Graph<T>* passedGraph, double passedTargetDensity) {
  * Calculates the shortest path through the Graph, using Dijkstra's Algorithm, returning
  * the result as an ordered sequence of entries in a vector.
  */
-vector<int> dijkstraPath(Graph<Node>* passedGraph, int passedStartVertex, int passedEndVertex) {
-	vector<int> path = vector<int>();
+void dijkstraPath(Graph<Node>* passedGraph, vector<int>* passedPathVector, int passedStartVertex, int passedEndVertex) {
 	// Initialize starting nodes
 	(*passedGraph->getVertex(passedStartVertex)).weight = 0;
 	vector<int> unvisited = vector<int>();
@@ -204,8 +194,7 @@ vector<int> dijkstraPath(Graph<Node>* passedGraph, int passedStartVertex, int pa
 		int currentVertex = unvisited.at(unvisited.size() - 1);
 		for (int iteratedVertex = 0; iteratedVertex < passedGraph->getVertexCount(); iteratedVertex += 1) {
 			Node* vertex = passedGraph->getVertex(iteratedVertex);
-			if (
-passedGraph->adjacent(currentVertex, iteratedVertex)) {
+			if (passedGraph->adjacent(currentVertex, iteratedVertex)) {
 				double traversalCost = passedGraph->getEdgeWeight(currentVertex, iteratedVertex) + (*vertex).weight;
 				if (traversalCost < (*vertex).weight) {
 					(*vertex).weight = traversalCost;
@@ -220,10 +209,9 @@ passedGraph->adjacent(currentVertex, iteratedVertex)) {
 	// Add discovered path to path vector
 	int iteratedVertex = passedEndVertex;
 	while ((*passedGraph->getVertex(iteratedVertex)).predecessor >= 0) {
-		path.push_back(iteratedVertex);
+		passedPathVector->push_back(iteratedVertex);
 		iteratedVertex = (*passedGraph->getVertex(iteratedVertex)).predecessor;
 	}
-	return path;
 }
 
 /**
