@@ -25,7 +25,6 @@
 using namespace std;
 
 #define ERROR_INVALID_ARGUMENT "ERROR: Invalid argument."
-#define INFINITE_DOUBLE std::numeric_limits<double>::max()
 
 
 /* Node Definition */
@@ -34,7 +33,7 @@ struct Node {
 	int predecessor;
 
 	Node() {
-		weight = INFINITE_DOUBLE;
+		weight = std::numeric_limits<double>::max();
 		predecessor = -1;
 	}
 };
