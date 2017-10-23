@@ -64,6 +64,7 @@ int main() {
 	int vertices;
 	double density, minWeight, maxWeight;
 	char printout;
+	bool runPathfind = true;
 
 	/**
 	 * TODO:
@@ -139,25 +140,31 @@ int main() {
 	if (print) {
 		cout << ":" << endl << endl;
 		printGraph(&graph, &cout);
-		printGraph(&graph, &file);
 	}
 	else {
 		cout << "." << endl;
 	}
+	printGraph(&graph, &file);
 	cout << endl;
 
 	// Get path from user
-	int start;
-	int end;
-	getIndex("Enter index of start point:", &start, graph.getVertexCount());
-	getIndex("Enter index of end point:", &end, graph.getVertexCount());
+	while (runPathfind) {
+		int start;
+		int end;
+		char again;
+		getIndex("Enter index of start point:", &start, graph.getVertexCount());
+		getIndex("Enter index of end point:", &end, graph.getVertexCount());
 
-	// Calculate path
-	vector<int> path = vector<int>();
-	dijkstraPath(&graph, &path, start, end);
-	printPath(&path, &graph, &cout);
-	printPath(&path, &graph, &file);
-	cout << endl;
+		// Calculate path
+		vector<int> path = vector<int>();
+		dijkstraPath(&graph, &path, start, end);
+		printPath(&path, &graph, &cout);
+		printPath(&path, &graph, &file);
+		cout << endl;
+
+		getParameter("Find additional paths for this graph? (y/n)", &again);
+		runPathfind = ((again == 'y') || (again == 'Y'));
+	}
 
 	// Complete!
 	cout << "Program terminated." << endl;
@@ -177,6 +184,9 @@ void populateGraph(Graph<T>* passedGraph, double passedTargetDensity, double pas
 		cout << "Warning: Minimum density for a connected graph with " << quantityVertices << " vertices is: " << minimumDensity << endl;
 		cout << "This will be the final density of the graph instead of " << passedTargetDensity << endl;
 		passedTargetDensity = minimumDensity;
+	}
+	if (passedTargetDensity > (2 * minimumDensity)) {
+		cout << "Warning: High target density. Pathfinding may take some time!" << endl;
 	}
 
 	// Establish minimum connected graph by walking between all vertices
@@ -224,6 +234,7 @@ void dijkstraPath(Graph<Node>* passedGraph, vector<int>* passedPathVector, int p
 	for (int ii = 0; ii < passedGraph->getVertexCount(); ii += 1) {
 		visited[ii] = false;
 	}
+	visited[passedStartVertex] = true;
 	passedGraph->getVertex(passedStartVertex)->weight = 0;
 	passedGraph->getVertex(passedStartVertex)->predecessor = passedStartVertex;
 	unvisited.push(passedStartVertex);
@@ -235,7 +246,7 @@ void dijkstraPath(Graph<Node>* passedGraph, vector<int>* passedPathVector, int p
 		Node* currentNode = passedGraph->getVertex(currentVertex);
 		visited[currentVertex] = true;
 		for (int ii = 0; ii < passedGraph->getVertexCount(); ii += 1) {
-			if (passedGraph->adjacent(currentVertex, ii) && (ii != currentVertex)) {
+			if (passedGraph->adjacent(currentVertex, ii) && (ii != currentVertex) && (!visited[ii])) {
 				Node* iteratedNode = passedGraph->getVertex(ii);
 				double traversalWeight = passedGraph->getEdgeWeight(currentVertex, ii) + currentNode->weight;
 				if (!visited[ii]) {
