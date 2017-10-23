@@ -14,17 +14,21 @@
  *********************************************************************/
 
 #include <cstdlib>
-#include <fstream>
 #include <ctime>
 #include <iostream>
 #include <iterator>
 #include <limits>
+#include <queue>
 #include <string>
 #include <vector>
+#include <fstream>
+
 #include "Graph.h"
+
 using namespace std;
 
 #define ERROR_INVALID_ARGUMENT "ERROR: Invalid argument."
+#define DOUBLE_INFINITY 5000
 #define SIMPLE_PROMPT "> "
 
 
@@ -34,7 +38,7 @@ struct Node {
 	int predecessor;
 
 	Node() {
-		weight = std::numeric_limits<double>::max();
+		weight = DOUBLE_INFINITY;
 		predecessor = -1;
 	}
 };
@@ -51,6 +55,7 @@ double getRandomDouble(double, double);
 int getRandomInteger(int, int);
 template<typename T>
 void getParameter(string, T*);
+void getIndex(string, int*, int);
 
 int main() {
 	srand(time(NULL));
@@ -68,9 +73,16 @@ int main() {
 
 	// Get number of vertices
 	getParameter("Enter the number of vertices the graph should have: ", &vertices);
-	while (vertices <= 0) {
+	while (vertices <= 1) {
 		cout << ERROR_INVALID_ARGUMENT << endl;
-		cout << "No paths available through a graph containing no vertices!" << endl;
+		if (vertices == 1) {
+			cout << "Look, you and I both know that's the trivial case. Here's your shortest path, you cheeky goob:" << endl;
+			cout << "0" << endl << endl << "Program terminated.";
+			return 0;
+		}
+		else {
+			cout << "Please enter a positive nonzero number greater than one." << endl;
+		}
 		getParameter(SIMPLE_PROMPT, &vertices);
 	}
 
@@ -115,13 +127,15 @@ int main() {
 	}
 	cout << endl;
 
+	// Get path from user
+	int start;
+	int end;
+	getIndex("Enter index of start point:", &start, graph.getVertexCount());
+	getIndex("Enter index of end point:", &end, graph.getVertexCount());
+
 	// Calculate path
-	int start = getRandomInteger(0, (vertices - 1));
-	int end = getRandomInteger(0, (vertices - 1));
-	cout << "Calculating path from vertex " << start << " to vertex " << end << "..." << endl;
 	vector<int> path = vector<int>();
 	dijkstraPath(&graph, &path, start, end);
-	cout << "Found path: " << endl;
 	printPath(&path, &graph, &cout);
 	printPath(&path, &graph, &file);
 	cout << endl;
@@ -185,36 +199,43 @@ void populateGraph(Graph<T>* passedGraph, double passedTargetDensity) {
  * the result as an ordered sequence of entries in a vector.
  */
 void dijkstraPath(Graph<Node>* passedGraph, vector<int>* passedPathVector, int passedStartVertex, int passedEndVertex) {
+	cout << "Calculating path from vertex " << passedStartVertex << " to vertex " << passedEndVertex << "..." << endl;
 	// Initialize starting nodes
-	(*passedGraph->getVertex(passedStartVertex)).weight = 0;
-	vector<int> unvisited = vector<int>();
-	unvisited.reserve(passedGraph->getVertexCount());
-	unvisited.push_back(0);
+	priority_queue<int> unvisited = priority_queue<int>();
+	bool visited[passedGraph->getVertexCount()];
+	for (int ii = 0; ii < passedGraph->getVertexCount(); ii += 1) {
+		visited[ii] = false;
+	}
+	passedGraph->getVertex(passedStartVertex)->weight = 0;
+	passedGraph->getVertex(passedStartVertex)->predecessor = passedStartVertex;
+	unvisited.push(passedStartVertex);
 
 	// Begin algorithm proper
-	while (unvisited.size() > 0) {
-		int currentVertex = unvisited.at(0);
+	while (!unvisited.empty()) {
+		int currentVertex = unvisited.top();
+		unvisited.pop();
+		Node* currentNode = passedGraph->getVertex(currentVertex);
+		visited[currentVertex] = true;
 		for (int ii = 0; ii < passedGraph->getVertexCount(); ii += 1) {
-			Node* vertex = passedGraph->getVertex(ii);
-			if (passedGraph->adjacent(currentVertex, ii)) {
-				double traversalCost = passedGraph->getEdgeWeight(currentVertex, ii) + (*vertex).weight;
-				if (traversalCost < (*vertex).weight) {
-					(*vertex).weight = traversalCost;
-					(*vertex).predecessor = currentVertex;
+			if (passedGraph->adjacent(currentVertex, ii) && (ii != currentVertex)) {
+				Node* iteratedNode = passedGraph->getVertex(ii);
+				double traversalWeight = passedGraph->getEdgeWeight(currentVertex, ii) + currentNode->weight;
+				if (!visited[ii]) {
+					unvisited.push(ii);
 				}
-				else {
-					unvisited.push_back(ii);
+				if (traversalWeight < iteratedNode->weight) {
+					iteratedNode->weight = traversalWeight;
+					iteratedNode->predecessor = currentVertex;
 				}
 			}
-			unvisited.erase(unvisited.begin());
 		}
 	}
 
 	// Add discovered path to path vector
 	int iteratedVertex = passedEndVertex;
-	while ((*passedGraph->getVertex(iteratedVertex)).predecessor >= 0) {
+	while ((iteratedVertex >= 0) && (iteratedVertex != passedStartVertex)) {
 		passedPathVector->push_back(iteratedVertex);
-		iteratedVertex = (*passedGraph->getVertex(iteratedVertex)).predecessor;
+		iteratedVertex = passedGraph->getVertex(iteratedVertex)->predecessor;
 	}
 }
 
@@ -243,10 +264,14 @@ void printGraph(Graph<T>* passedGraph, ostream* passedStream) {
 template<typename T>
 void printPath(vector<int>* passedVector, Graph<T>* passedGraph, ostream* passedStream) {
 	if (passedVector->size() > 0) {
+		(*passedStream) << "Found path: (" << passedVector->at(0) << " to " << passedVector->at(passedVector->size() - 1) << ")" << endl;
+		double pathWeight = 0;
 		(*passedStream) << passedVector->at(0);
 		for (int ii = 1; ii < passedVector->size(); ii += 1) {
 			(*passedStream) << " -> " << passedVector->at(ii);
+			pathWeight += passedGraph->getEdgeWeight(passedVector->at(ii - 1), passedVector->at(ii));
 		}
+		(*passedStream) << endl << "Path has total weight: " << pathWeight << endl << endl;
 	}
 }
 
@@ -272,4 +297,16 @@ template<typename T>
 void getParameter(string passedString, T* passedType) {
 	cout << passedString << endl << SIMPLE_PROMPT;
 	cin >> *passedType;
+}
+
+/**
+ * Returns a validated index value from the command line.
+ */
+void getIndex(string passedString, int* passedValue, int passedMaxValue) {
+	getParameter(passedString, passedValue);
+	while ((*passedValue < 0) || (*passedValue >= passedMaxValue)) {
+		cout << ERROR_INVALID_ARGUMENT << endl;
+		cout << "Please enter a vertex index in the range 0 to " << passedMaxValue - 1 << endl;
+		getParameter(passedString, passedValue);
+	}
 }
