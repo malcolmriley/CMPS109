@@ -62,15 +62,9 @@ int main() {
 	// Parse and validate command line arguments
 	string filename;
 	int vertices;
-	double density, minWeight, maxWeight;
+	double density, minWeight, maxWeight, avgEdges;
 	char printout;
 	bool runPathfind = true;
-
-	/**
-	 * TODO:
-	 * This is the maximal density of a simple undirected graph. For future iterations that supports other graph types, this will be a value calculated by the program.
-	 */
-	double maxDensity = 1;
 
 	// Get number of vertices
 	getParameter("Enter the number of vertices the graph should have: ", &vertices);
@@ -88,16 +82,13 @@ int main() {
 	}
 
 	// Get target density
-	getParameter("Enter the target density of the graph: ", &density);
-	while (density < 0) {
+	getParameter("Enter the average number of connected edges per vertex: ", &avgEdges);
+	while (avgEdges <= 0) {
 		cout << ERROR_INVALID_ARGUMENT << endl;
-		cout << "Density must be positive." << endl;
+		cout << "Please enter a positive nonzero decimal number:" << endl;
+		getParameter(SIMPLE_PROMPT, &avgEdges);
 	}
-	if (density > maxDensity) {
-		cout << ERROR_INVALID_ARGUMENT << endl;
-		cout << "Density may not exceed " << maxDensity << " for a graph of " << vertices << " vertices; setting target density to " << maxDensity << endl;
-		density = maxDensity;
-	}
+	density = ((1 / (double)vertices) * avgEdges);
 
 	// Get min and max weights
 	getParameter("Enter minimum edge weight: ", &minWeight);
@@ -136,7 +127,7 @@ int main() {
 	cout << "Initializing graph with " << vertices << " vertices and intended density " << density << "." << endl;
 	Graph<Node> graph = Graph<Node>(vertices, false);
 	populateGraph(&graph, density, minWeight, maxWeight);
-	cout << "Graph initialized: " << vertices << " vertices, density " << graph.getDensity();
+	cout << "Graph initialized: " << vertices << " vertices, " << graph.getEdgeCount() << " edges, and density " << graph.getDensity();
 	if (print) {
 		cout << ":" << endl << endl;
 		printGraph(&graph, &cout);
@@ -184,9 +175,6 @@ void populateGraph(Graph<T>* passedGraph, double passedTargetDensity, double pas
 		cout << "Warning: Minimum density for a connected graph with " << quantityVertices << " vertices is: " << minimumDensity << endl;
 		cout << "This will be the final density of the graph instead of " << passedTargetDensity << endl;
 		passedTargetDensity = minimumDensity;
-	}
-	if (passedTargetDensity > (2 * minimumDensity)) {
-		cout << "Warning: High target density. Pathfinding may take some time!" << endl;
 	}
 
 	// Establish minimum connected graph by walking between all vertices
@@ -246,15 +234,17 @@ void dijkstraPath(Graph<Node>* passedGraph, vector<int>* passedPathVector, int p
 		Node* currentNode = passedGraph->getVertex(currentVertex);
 		visited[currentVertex] = true;
 		for (int ii = 0; ii < passedGraph->getVertexCount(); ii += 1) {
-			if (passedGraph->adjacent(currentVertex, ii) && (ii != currentVertex) && (!visited[ii])) {
-				Node* iteratedNode = passedGraph->getVertex(ii);
-				double traversalWeight = passedGraph->getEdgeWeight(currentVertex, ii) + currentNode->weight;
-				if (!visited[ii]) {
-					unvisited.push(ii);
-				}
-				if (traversalWeight < iteratedNode->weight) {
-					iteratedNode->weight = traversalWeight;
-					iteratedNode->predecessor = currentVertex;
+			if (!visited[ii]) {
+				if (passedGraph->adjacent(currentVertex, ii) && (ii != currentVertex)) {
+					Node* iteratedNode = passedGraph->getVertex(ii);
+					double traversalWeight = passedGraph->getEdgeWeight(currentVertex, ii) + currentNode->weight;
+					if (!visited[ii]) {
+						unvisited.push(ii);
+					}
+					if (traversalWeight < iteratedNode->weight) {
+						iteratedNode->weight = traversalWeight;
+						iteratedNode->predecessor = currentVertex;
+					}
 				}
 			}
 		}
