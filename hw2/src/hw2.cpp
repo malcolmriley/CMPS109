@@ -206,7 +206,8 @@ void populateGraph(Graph<T>* passedGraph, double passedTargetDensity, double pas
 		int first = getRandomInteger(quantityVertices - 1);
 		int second = getRandomInteger(quantityVertices - 1);
 		if (first != second) {
-			passedGraph->addEdge(first, second);
+			double edgeWeight = getRandomDouble(passedMinimumWeight, passedMaximumWeight);
+			passedGraph->addEdge(first, second, edgeWeight);
 		}
 	}
 }
@@ -297,8 +298,8 @@ void printPath(vector<int>* passedVector, Graph<T>* passedGraph, ostream* passed
  * Retrieves a random double in the passed range, inclusive
  */
 double getRandomDouble(double passedLowerBound, double passedUpperBound) {
-	double value = ((double) rand()) / RAND_MAX;
-	return passedLowerBound + (value * (passedUpperBound - passedLowerBound));
+	double value = ((double) rand()) / ((double)RAND_MAX);
+	return (value * (passedUpperBound - passedLowerBound)) + passedLowerBound;
 }
 
 /**
