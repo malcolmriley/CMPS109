@@ -88,7 +88,7 @@ int main() {
 		cout << "Please enter a positive nonzero decimal number:" << endl;
 		getParameter(SIMPLE_PROMPT, &avgEdges);
 	}
-	density = ((1 / (double)vertices) * avgEdges);
+	density = (1 / ((double)vertices) * avgEdges);
 
 	// Get min and max weights
 	getParameter("Enter minimum edge weight: ", &minWeight);
