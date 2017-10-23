@@ -189,8 +189,8 @@ double Graph<T>::getEdgeWeight(int passedFirstVertex, int passedSecondVertex) {
 template <typename T>
 double Graph<T>::getDensity() {
 	double effectiveEdges = edges;
-	if (!directed) {
-		effectiveEdges *= 2;
+	if (directed) {
+		effectiveEdges /= 2;
 	}
 	return (effectiveEdges / (vertices * (vertices - 1)));
 }
