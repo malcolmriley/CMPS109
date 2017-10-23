@@ -119,7 +119,8 @@ int main() {
 	int start = getRandomInteger(0, (vertices - 1));
 	int end = getRandomInteger(0, (vertices - 1));
 	cout << "Calculating path from vertex " << start << " to vertex " << end << "..." << endl;
-	vector<int> path = dijkstraPath(&graph, start, end);
+	vector<int> path = vector<int>();
+	dijkstraPath(&graph, &path, start, end);
 	cout << "Found path: " << endl;
 	printPath(&path, &graph, &cout);
 	printPath(&path, &graph, &file);
