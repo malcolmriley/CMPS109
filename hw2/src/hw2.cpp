@@ -28,7 +28,7 @@
 using namespace std;
 
 #define ERROR_INVALID_ARGUMENT "ERROR: Invalid argument."
-#define DOUBLE_INFINITY 5000
+#define DOUBLE_INFINITY std::numeric_limits<double>::max()
 #define SIMPLE_PROMPT "> "
 
 
@@ -205,7 +205,9 @@ void populateGraph(Graph<T>* passedGraph, double passedTargetDensity, double pas
 	while (passedGraph->getDensity() < passedTargetDensity) {
 		int first = getRandomInteger(quantityVertices - 1);
 		int second = getRandomInteger(quantityVertices - 1);
-		passedGraph->addEdge(first, second);
+		if (first != second) {
+			passedGraph->addEdge(first, second);
+		}
 	}
 }
 
@@ -262,7 +264,7 @@ template<typename T>
 void printGraph(Graph<T>* passedGraph, ostream* passedStream) {
 	if (passedGraph->getVertexCount() > 0) {
 		for (int ii = 0; ii < passedGraph->getVertexCount(); ii += 1) {
-			(*passedStream) << "Vertex ( " << ii << " ) is adjacent to: " << endl;
+			(*passedStream) << "Vertex\t( " << ii << " ) is adjacent to: " << endl;
 			for (int jj = 0; jj < passedGraph->getVertexCount(); jj += 1) {
 				if (passedGraph->adjacent(ii, jj)) {
 					(*passedStream) << "\t( " <<jj << " ), by edge with weight: " << passedGraph->getEdgeWeight(ii, jj) << endl;
