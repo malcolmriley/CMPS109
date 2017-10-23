@@ -237,6 +237,7 @@ void dijkstraPath(Graph<Node>* passedGraph, vector<int>* passedPathVector, int p
 		passedPathVector->push_back(iteratedVertex);
 		iteratedVertex = passedGraph->getVertex(iteratedVertex)->predecessor;
 	}
+	passedPathVector->push_back(passedStartVertex);
 }
 
 /**
