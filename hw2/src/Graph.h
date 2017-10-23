@@ -53,7 +53,7 @@ public:
 	double getDensity();
 	bool isDirected();
 	double getAverageWeight();
-	T getVertex(int);
+	T* getVertex(int);
 	void setVertex(T, int);
 
 	// Manipulators
@@ -256,11 +256,11 @@ void Graph<T>::removeEdge(int passedFirstVertex, int passedSecondVertex) {
  * Returns the value of the vertex specified by the passed index, or nullptr if no such vertex exists.
  */
 template <typename T>
-T Graph<T>::getVertex(int passedIndex) {
+T* Graph<T>::getVertex(int passedIndex) {
 	if (Graph::validateIndex(passedIndex)) {
-		return vertexValues[passedIndex];
+		return &(vertexValues[passedIndex]);
 	}
-	return 0;
+	return nullptr;
 }
 
 /**
