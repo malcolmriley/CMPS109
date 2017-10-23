@@ -21,13 +21,12 @@
 #include <limits>
 #include <string>
 #include <vector>
-
 #include "Graph.h"
+using namespace std;
 
 #define ERROR_INVALID_ARGUMENT "ERROR: Invalid argument."
 #define INFINITE_DOUBLE std::numeric_limits<double>::max()
 
-using namespace std;
 
 /* Node Definition */
 struct Node {
