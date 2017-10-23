@@ -115,7 +115,7 @@ Graph<T>::~Graph() {
 /* Internal Methods */
 template <typename T>
 bool Graph<T>::validateIndex(int passedIndex) {
-	return (passedIndex > 0);
+	return (passedIndex >= 0);
 }
 
 template <typename T>
