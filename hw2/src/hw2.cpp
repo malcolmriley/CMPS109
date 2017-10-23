@@ -188,22 +188,25 @@ void dijkstraPath(Graph<Node>* passedGraph, vector<int>* passedPathVector, int p
 	// Initialize starting nodes
 	(*passedGraph->getVertex(passedStartVertex)).weight = 0;
 	vector<int> unvisited = vector<int>();
+	unvisited.reserve(passedGraph->getVertexCount());
 	unvisited.push_back(0);
 
 	// Begin algorithm proper
 	while (unvisited.size() > 0) {
-		int currentVertex = unvisited.at(unvisited.size() - 1);
-		for (int iteratedVertex = 0; iteratedVertex < passedGraph->getVertexCount(); iteratedVertex += 1) {
-			Node* vertex = passedGraph->getVertex(iteratedVertex);
-			if (passedGraph->adjacent(currentVertex, iteratedVertex)) {
-				double traversalCost = passedGraph->getEdgeWeight(currentVertex, iteratedVertex) + (*vertex).weight;
+		int currentVertex = unvisited.at(0);
+		for (int ii = 0; ii < passedGraph->getVertexCount(); ii += 1) {
+			Node* vertex = passedGraph->getVertex(ii);
+			if (passedGraph->adjacent(currentVertex, ii)) {
+				double traversalCost = passedGraph->getEdgeWeight(currentVertex, ii) + (*vertex).weight;
 				if (traversalCost < (*vertex).weight) {
 					(*vertex).weight = traversalCost;
 					(*vertex).predecessor = currentVertex;
 				}
-				unvisited.push_back(iteratedVertex);
+				else {
+					unvisited.push_back(ii);
+				}
 			}
-			unvisited.pop_back();
+			unvisited.erase(unvisited.begin());
 		}
 	}
 
@@ -239,10 +242,10 @@ void printGraph(Graph<T>* passedGraph, ostream* passedStream) {
  */
 template<typename T>
 void printPath(vector<int>* passedVector, Graph<T>* passedGraph, ostream* passedStream) {
-	if ((*passedVector).size() > 0) {
-		(*passedStream) << (*passedVector).at(0);
-		for (int ii = 1; ii < (*passedVector).size(); ii += 1) {
-			(*passedStream) << " -> " << (*passedVector).at(ii);
+	if (passedVector->size() > 0) {
+		(*passedStream) << passedVector->at(0);
+		for (int ii = 1; ii < passedVector->size(); ii += 1) {
+			(*passedStream) << " -> " << passedVector->at(ii);
 		}
 	}
 }
