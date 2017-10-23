@@ -45,14 +45,14 @@ struct Node {
 
 /* Function Declarations */
 template<typename T>
-void populateGraph(Graph<T>*, double);
+void populateGraph(Graph<T>*, double, double, double);
 void dijkstraPath(Graph<Node>*, vector<int>*, int, int);
 template<typename T>
 void printGraph(Graph<T>*, ostream*);
 template<typename T>
 void printPath(vector<int>*, Graph<T>*, ostream*);
 double getRandomDouble(double, double);
-int getRandomInteger(int, int);
+int getRandomInteger(int);
 template<typename T>
 void getParameter(string, T*);
 void getIndex(string, int*, int);
@@ -62,7 +62,7 @@ int main() {
 	// Parse and validate command line arguments
 	string filename;
 	int vertices;
-	double density;
+	double density, minWeight, maxWeight;
 	char printout;
 
 	/**
@@ -98,6 +98,25 @@ int main() {
 		density = maxDensity;
 	}
 
+	// Get min and max weights
+	getParameter("Enter minimum edge weight: ", &minWeight);
+	while (minWeight < 0) {
+		cout << ERROR_INVALID_ARGUMENT << endl;
+		cout << "Please enter a non-negative decimal number for the minimum edge weight: " << endl;
+		getParameter(SIMPLE_PROMPT, &minWeight);
+	}
+	getParameter("Enter maximum edge weight: ", &maxWeight);
+	while ((maxWeight < 0) && (maxWeight < minWeight)) {
+		cout << ERROR_INVALID_ARGUMENT << endl;
+		if (maxWeight < 0) {
+			cout << "Please enter a non-negative decimal number for the maximum edge weight. " << endl;
+		}
+		if (maxWeight < minWeight) {
+			cout << "Maximum edge weight must exceed minimum edge weight, please enter a value greater than " << minWeight << ": " << endl;
+		}
+		getParameter(SIMPLE_PROMPT, &maxWeight);
+	}
+
 	// Get whether the graph should print out
 	getParameter("Print graph representation to command line? (y/n)", &printout);
 	bool print = (printout == 'y') || (printout == 'Y');
@@ -115,7 +134,7 @@ int main() {
 	// Initialize and print graph
 	cout << "Initializing graph with " << vertices << " vertices and intended density " << density << "." << endl;
 	Graph<Node> graph = Graph<Node>(vertices, false);
-	populateGraph(&graph, density);
+	populateGraph(&graph, density, minWeight, maxWeight);
 	cout << "Graph initialized: " << vertices << " vertices, density " << graph.getDensity();
 	if (print) {
 		cout << ":" << endl << endl;
@@ -151,7 +170,7 @@ int main() {
  * indicated target density.
  */
 template<typename T>
-void populateGraph(Graph<T>* passedGraph, double passedTargetDensity) {
+void populateGraph(Graph<T>* passedGraph, double passedTargetDensity, double passedMinimumWeight, double passedMaximumWeight) {
 	double quantityVertices = passedGraph->getVertexCount();
 	double minimumDensity = 1 / quantityVertices;
 	if (passedTargetDensity < minimumDensity) {
@@ -169,7 +188,7 @@ void populateGraph(Graph<T>* passedGraph, double passedTargetDensity) {
 		vertexList.push_back(ii);
 	}
 	while (vertexList.size() > 0) {
-		int index = getRandomInteger(0, (vertexList.size() - 1));
+		int index = getRandomInteger(vertexList.size() - 1);
 		int value = vertexList.at(index);
 		unvisited.push_back(value);
 		vertexList.erase(vertexList.begin() + index);
@@ -178,18 +197,14 @@ void populateGraph(Graph<T>* passedGraph, double passedTargetDensity) {
 	for (int ii = 0; ii < (quantityVertices - 1); ii += 1) {
 		int first = unvisited.at(ii);
 		int second = unvisited.at(ii + 1);
-		/**
-		 * TODO:
-		 * Future iterations could have a configurable value for edgeWeight.
-		 */
-		double edgeWeight = getRandomDouble(0.001, 5.000);
+		double edgeWeight = getRandomDouble(passedMinimumWeight, passedMaximumWeight);
 		passedGraph->addEdge(first, second, edgeWeight);
 	}
 
 	// Add random edges until density requirement is satisfied
 	while (passedGraph->getDensity() < passedTargetDensity) {
-		int first = getRandomInteger(0, quantityVertices - 1);
-		int second = getRandomInteger(0, quantityVertices - 1);
+		int first = getRandomInteger(quantityVertices - 1);
+		int second = getRandomInteger(quantityVertices - 1);
 		passedGraph->addEdge(first, second);
 	}
 }
@@ -234,10 +249,10 @@ void dijkstraPath(Graph<Node>* passedGraph, vector<int>* passedPathVector, int p
 	// Add discovered path to path vector
 	int iteratedVertex = passedEndVertex;
 	while ((iteratedVertex >= 0) && (iteratedVertex != passedStartVertex)) {
-		passedPathVector->push_back(iteratedVertex);
+		passedPathVector->insert(passedPathVector->begin(), iteratedVertex);
 		iteratedVertex = passedGraph->getVertex(iteratedVertex)->predecessor;
 	}
-	passedPathVector->push_back(passedStartVertex);
+	passedPathVector->insert(passedPathVector->begin(), passedStartVertex);
 }
 
 /**
@@ -247,13 +262,13 @@ template<typename T>
 void printGraph(Graph<T>* passedGraph, ostream* passedStream) {
 	if (passedGraph->getVertexCount() > 0) {
 		for (int ii = 0; ii < passedGraph->getVertexCount(); ii += 1) {
-			(*passedStream) << "Vertex " << ii << " is adjacent to: " << endl << "\t( ";
+			(*passedStream) << "Vertex ( " << ii << " ) is adjacent to: " << endl;
 			for (int jj = 0; jj < passedGraph->getVertexCount(); jj += 1) {
 				if (passedGraph->adjacent(ii, jj)) {
-					(*passedStream) << jj << " ";
+					(*passedStream) << "\t( " <<jj << " ), by edge with weight: " << passedGraph->getEdgeWeight(ii, jj) << endl;
 				}
 			}
-			(*passedStream) << ")" << endl;
+			(*passedStream) << endl;
 		}
 		(*passedStream) << endl;
 	}
@@ -287,8 +302,8 @@ double getRandomDouble(double passedLowerBound, double passedUpperBound) {
 /**
  * Returns a random integer in the passed range, inclusive
  */
-int getRandomInteger(int passedLowerBound, int passedUpperBound) {
-	return (rand() % (passedUpperBound - passedLowerBound + 1)) + passedLowerBound;
+int getRandomInteger(int passedUpperBound) {
+	return (rand() % (passedUpperBound + 1));
 }
 
 /**
