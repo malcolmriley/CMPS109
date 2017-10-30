@@ -50,6 +50,7 @@ public:
 	int getEdgeCount();
 	bool adjacent(int, int);
 	double getEdgeWeight(int, int);
+	double getTotalWeight();
 	double getDensity();
 	bool isDirected();
 	double getAverageWeight();
@@ -181,6 +182,27 @@ double Graph<T>::getEdgeWeight(int passedFirstVertex, int passedSecondVertex) {
 		return(edgeMatrix[passedFirstVertex][passedSecondVertex]);
 	}
 	return EDGE_UNDEFINED;
+}
+
+/**
+ * Returns the total weight of all edges in this Graph.
+ */
+template <typename T>
+double Graph<T>::getTotalWeight() {
+	double sumWeight = 0;
+	if (edges > 0) {
+		for (int ii = 0; ii < vertices; ii += 1) {
+			for (int jj = 0; jj < vertices; jj += 1) {
+				if (adjacent(ii, jj)) {
+					sumWeight += getEdgeWeight(ii, jj);
+				}
+			}
+		}
+	}
+	if (!directed) {
+		sumWeight /= 2;
+	}
+	return sumWeight;
 }
 
 /**
