@@ -6,21 +6,46 @@
  * 10-2017
  *
  * Implementation file for CMPS109 HW3: Minimum Spanning Tree Algorithm.
+ *
+ * Note to grader:
+ * - MST Algorithm implementation is within calculateMST and
+ * getMinimalEdge functions.
  *********************************************************************/
 
 #include <cstdlib>
 #include <iostream>
 #include <iterator>
+#include <limits>
 #include <vector>
 
 #include "Graph.h"
 
 #define SIMPLE_PROMPT "> "
 #define ERROR_INVALID_ARGUMENT "ERROR: Invalid argument."
+#define DOUBLE_INFINITY std::numeric_limits<double>::max()
 
 using namespace std;
 
 // New Functions
+struct Edge {
+	Edge() {
+		first = -1;
+		second = -1;
+		index = -1;
+		weight = DOUBLE_INFINITY;
+		initialized = false;
+	}
+	int first, second, index;
+	double weight;
+	bool initialized;
+};
+
+template <typename T>
+void calculateMST(Graph<T>*, Graph<T>*);
+template <typename T>
+Edge getMinimalEdge(Graph<T>*, vector<int>*, vector<int>*);
+template <typename T>
+void compareGraphs(Graph<T>*, Graph<T>*, ostream*);
 
 // HW2 Imported Functions
 template<typename T>
@@ -31,8 +56,6 @@ template <typename T>
 void getParameter(string, T*);
 template<typename T>
 void printGraph(Graph<T>*, ostream*);
-template<typename T>
-void calculateMST(Graph<T>*, Graph<T>*);
 
 int main() {
 	int vertices;
@@ -79,7 +102,7 @@ int main() {
 	Graph<double> sourceGraph = Graph<double>(vertices, false);
 	Graph<double> destGraph = Graph<double>(vertices, false);
 	populateGraph(&sourceGraph, density, minWeight, maxWeight);
-	cout << "Graph initialized: " << vertices << " vertices, " << sourceGraph.getEdgeCount() << " edges, and density " << sourceGraph.getDensity() << ": " << endl;
+	cout << "Graph initialized: " << vertices << " vertices, " << sourceGraph.getEdgeCount() << " edges, and density " << sourceGraph.getDensity() << ": " << endl << endl;
 	printGraph(&sourceGraph, &cout);
 	cout << endl << endl;
 
@@ -87,15 +110,69 @@ int main() {
 	cout << "Calculating minimum spanning tree for graph..." << endl;
 	calculateMST(&sourceGraph, &destGraph);
 
-	cout << "Minimum spanning tree found!" << endl;
+	cout << "Minimum spanning tree found!" << endl << endl;
 	printGraph(&destGraph, &cout);
+
+	compareGraphs(&sourceGraph, &destGraph, &cout);
 
 	return 0;
 }
 
+/*
+ * Calculates the minimum spanning tree of the first passed graph, using Prim's Algorithm, outputting to the second passed graph.
+ */
 template<typename T>
 void calculateMST(Graph<T>* passedSourceGraph, Graph<T>* passedDestinationGraph) {
+	int vertices = passedSourceGraph->getVertexCount();
+	vector<int> unconnected = vector<int>();
+	vector<int> connected = vector<int>();
 
+	// Add zero as first connected node
+	connected.push_back(0);
+	for (int ii = 1; ii < vertices; ii += 1) {
+		unconnected.push_back(ii);
+	}
+
+	while (!unconnected.empty()) {
+		Edge edge = getMinimalEdge(passedSourceGraph, &connected, &unconnected);
+		if (edge.initialized) {
+			passedDestinationGraph->addEdge(edge.first, edge.second, passedSourceGraph->getEdgeWeight(edge.first, edge.second));
+			unconnected.erase(unconnected.begin() + edge.index);
+			connected.push_back(edge.second);
+		}
+	}
+}
+
+/**
+ * Returns the minimal edge discovered between the two vertex sets: that of the connected vertices, and the unconnected vertices.
+ */
+template <typename T>
+Edge getMinimalEdge(Graph<T>* passedGraph, vector<int>* passedConnectedVertices, vector<int>* passedUnconnectedVertices) {
+	Edge minimalEdge;
+	for (int ii = 0; ii < passedConnectedVertices->size(); ii += 1) {
+		int connected = passedConnectedVertices->at(ii);
+		for (int jj = 0; jj < passedUnconnectedVertices->size(); jj += 1) {
+			int unconnected = passedUnconnectedVertices->at(jj);
+			if (passedGraph->adjacent(connected, unconnected)) {
+				double weight = passedGraph->getEdgeWeight(connected, unconnected);
+				if (weight < minimalEdge.weight) {
+					minimalEdge.weight = weight;
+					minimalEdge.first = connected;
+					minimalEdge.second = unconnected;
+					minimalEdge.initialized = true;
+					minimalEdge.index = jj;
+				}
+			}
+		}
+	}
+	return minimalEdge;
+}
+
+template <typename T>
+void compareGraphs(Graph<T>* passedFirstGraph, Graph<T>* passedSecondGraph, ostream* passedStream) {
+	(*passedStream) << "Comparison: " << endl;
+	(*passedStream) << "\tOriginal had " << passedFirstGraph->getEdgeCount() << " edges, reduced to " << passedSecondGraph->getEdgeCount() << endl;
+	(*passedStream) << "\tOriginal weighed " << passedFirstGraph->getTotalWeight() << ", reduced to " << passedSecondGraph->getTotalWeight() << endl;
 }
 
 /********************** Imported from HW2 ****************************/
