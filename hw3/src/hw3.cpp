@@ -15,20 +15,104 @@
 
 #include "Graph.h"
 
+#define SIMPLE_PROMPT "> "
+#define ERROR_INVALID_ARGUMENT "ERROR: Invalid argument."
+
 using namespace std;
 
+// New Functions
+
+// HW2 Imported Functions
 template<typename T>
 void populateGraph(Graph<T>*, double, double, double);
 double getRandomDouble(double, double);
 int getRandomInteger(int);
+template <typename T>
+void getParameter(string, T*);
+template<typename T>
+void printGraph(Graph<T>*, ostream*);
+template<typename T>
+void calculateMST(Graph<T>*, Graph<T>*);
 
 int main() {
-	cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	int vertices;
+	double density, minWeight, maxWeight, avgEdges;
+
+	// Get number of vertices
+	getParameter("Enter the number of vertices the graph should have: ", &vertices);
+	while (vertices <= 1) {
+		cout << ERROR_INVALID_ARGUMENT << endl;
+		cout << "Please enter a positive nonzero number greater than one." << endl;
+		getParameter(SIMPLE_PROMPT, &vertices);
+	}
+
+	// Get target density
+	getParameter("Enter the average number of connected edges per vertex: ", &avgEdges);
+	while (avgEdges <= 0) {
+		cout << ERROR_INVALID_ARGUMENT << endl;
+		cout << "Please enter a positive nonzero decimal number:" << endl;
+		getParameter(SIMPLE_PROMPT, &avgEdges);
+	}
+	density = (1 / ((double)vertices) * avgEdges);
+
+	// Get min and max weights
+	getParameter("Enter minimum edge weight: ", &minWeight);
+	while (minWeight < 0) {
+		cout << ERROR_INVALID_ARGUMENT << endl;
+		cout << "Please enter a non-negative decimal number for the minimum edge weight: " << endl;
+		getParameter(SIMPLE_PROMPT, &minWeight);
+	}
+	getParameter("Enter maximum edge weight: ", &maxWeight);
+	while ((maxWeight < 0) && (maxWeight < minWeight)) {
+		cout << ERROR_INVALID_ARGUMENT << endl;
+		if (maxWeight < 0) {
+			cout << "Please enter a non-negative decimal number for the maximum edge weight. " << endl;
+		}
+		if (maxWeight < minWeight) {
+			cout << "Maximum edge weight must exceed minimum edge weight, please enter a value greater than " << minWeight << ": " << endl;
+		}
+		getParameter(SIMPLE_PROMPT, &maxWeight);
+	}
+
+	// Initialize and print graph
+	cout << "Initializing graph with " << vertices << " vertices and intended density " << density << "." << endl;
+	Graph<double> sourceGraph = Graph<double>(vertices, false);
+	Graph<double> destGraph = Graph<double>(vertices, false);
+	populateGraph(&sourceGraph, density, minWeight, maxWeight);
+	cout << "Graph initialized: " << vertices << " vertices, " << sourceGraph.getEdgeCount() << " edges, and density " << sourceGraph.getDensity() << ": " << endl;
+	printGraph(&sourceGraph, &cout);
+	cout << endl << endl;
+
+	// Calculate MST
+	cout << "Calculating minimum spanning tree for graph..." << endl;
+	calculateMST(&sourceGraph, &destGraph);
+
+	cout << "Minimum spanning tree found!" << endl;
+	printGraph(&destGraph, &cout);
+
 	return 0;
+}
+
+template<typename T>
+void calculateMST(Graph<T>* passedSourceGraph, Graph<T>* passedDestinationGraph) {
+
+}
+
+/********************** Imported from HW2 ****************************/
+
+/**
+ * Returns a parameter retrieved from the command line.
+ */
+template<typename T>
+void getParameter(string passedString, T* passedType) {
+	cout << passedString << endl << SIMPLE_PROMPT;
+	cin >> *passedType;
 }
 
 /**
  * Prints a representation of the Graph to the passed ostream (fstream or cout, for instance).
+ *
+ * Originally written for HW2
  */
 template<typename T>
 void printGraph(Graph<T>* passedGraph, ostream* passedStream) {
@@ -37,7 +121,7 @@ void printGraph(Graph<T>* passedGraph, ostream* passedStream) {
 			(*passedStream) << "Vertex\t( " << ii << " ) is adjacent to: " << endl;
 			for (int jj = 0; jj < passedGraph->getVertexCount(); jj += 1) {
 				if (passedGraph->adjacent(ii, jj)) {
-					(*passedStream) << "\t( " <<jj << " ), by edge with weight: " << passedGraph->getEdgeWeight(ii, jj) << endl;
+					(*passedStream) << "\t( " << jj << " ), by edge with weight: " << passedGraph->getEdgeWeight(ii, jj) << endl;
 				}
 			}
 			(*passedStream) << endl;
@@ -49,7 +133,7 @@ void printGraph(Graph<T>* passedGraph, ostream* passedStream) {
 /**
  * Populates the passed graph with random edges, guaranteeing a connected graph by performing a random edge walk between all included vertices
  *
- * Algorithm originally implemented for HW2
+ * Originally written for HW2
  */
 template<typename T>
 void populateGraph(Graph<T>* passedGraph, double passedTargetDensity, double passedMinimumWeight, double passedMaximumWeight) {
@@ -75,7 +159,6 @@ void populateGraph(Graph<T>* passedGraph, double passedTargetDensity, double pas
 		unvisited.push_back(value);
 		vertexList.erase(vertexList.begin() + index);
 	}
-	cout << endl;
 	for (int ii = 0; ii < (quantityVertices - 1); ii += 1) {
 		int first = unvisited.at(ii);
 		int second = unvisited.at(ii + 1);
@@ -96,6 +179,8 @@ void populateGraph(Graph<T>* passedGraph, double passedTargetDensity, double pas
 
 /**
  * Retrieves a random double in the passed range, inclusive
+ *
+ * Originally written for HW2
  */
 double getRandomDouble(double passedLowerBound, double passedUpperBound) {
 	double value = ((double) rand()) / ((double)RAND_MAX);
@@ -104,6 +189,8 @@ double getRandomDouble(double passedLowerBound, double passedUpperBound) {
 
 /**
  * Returns a random integer from zero to passedUpperBound, inclusive
+ *
+ * Originally written for HW2
  */
 int getRandomInteger(int passedUpperBound) {
 	return (rand() % (passedUpperBound + 1));
