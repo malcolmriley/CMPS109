@@ -28,6 +28,25 @@ int main() {
 }
 
 /**
+ * Prints a representation of the Graph to the passed ostream (fstream or cout, for instance).
+ */
+template<typename T>
+void printGraph(Graph<T>* passedGraph, ostream* passedStream) {
+	if (passedGraph->getVertexCount() > 0) {
+		for (int ii = 0; ii < passedGraph->getVertexCount(); ii += 1) {
+			(*passedStream) << "Vertex\t( " << ii << " ) is adjacent to: " << endl;
+			for (int jj = 0; jj < passedGraph->getVertexCount(); jj += 1) {
+				if (passedGraph->adjacent(ii, jj)) {
+					(*passedStream) << "\t( " <<jj << " ), by edge with weight: " << passedGraph->getEdgeWeight(ii, jj) << endl;
+				}
+			}
+			(*passedStream) << endl;
+		}
+		(*passedStream) << endl;
+	}
+}
+
+/**
  * Populates the passed graph with random edges, guaranteeing a connected graph by performing a random edge walk between all included vertices
  *
  * Algorithm originally implemented for HW2
