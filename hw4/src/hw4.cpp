@@ -41,6 +41,18 @@ int main() {
 	return 0;
 }
 
+
+/********************** Imported from HW2 ****************************/
+
+/**
+ * Returns a parameter retrieved from the command line.
+ */
+template<typename T>
+void getParameter(string passedString, T* passedType) {
+	cout << passedString << endl << SIMPLE_PROMPT;
+	cin >> *passedType;
+}
+
 /**
  * Calculates the shortest path through the Graph, using Dijkstra's Algorithm, returning
  * the result as an ordered sequence of entries in a vector.
