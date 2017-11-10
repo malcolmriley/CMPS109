@@ -41,7 +41,7 @@ struct Cell {
 template <typename T>
 void getParameter(string, T*);
 void dijkstraPath(Graph<Cell>*, vector<int>*, char, int, int);
-Graph<Cell> generateBoard(int);
+Graph<Cell> generateBoard(int, int*, int*, int*, int*);
 void populateBoard(Graph<Cell>*);
 void printBoard(Graph<Cell>*);
 
@@ -55,22 +55,38 @@ int main() {
 		getParameter("Please enter the dimension of the board:", &boardDimensions);
 	}
 
+	Graph<Cell> board = generateBoard(boardDimensions, &NORTH, &SOUTH, &EAST, &WEST);
+
 	return 0;
 }
 
-Graph<Cell> generateBoard(int passedDimensions) {
+Graph<Cell> generateBoard(int passedDimensions, int* passedNorthNode, int* passedSouthNode, int* passedEastNode, int* passedWestNode) {
 	cout << "Generating " << passedDimensions << "x" << passedDimensions << " board..." << endl;
 
-	cout << "Board generated!" << endl;
+	// Instantiate new graph
+	Graph<Cell> newGraph = Graph<Cell>(passedDimensions + 4);
+
+	// Store indices of "special" board-side vertices
+	(*passedNorthNode) = passedDimensions + 1;
+	(*passedSouthNode) = passedDimensions + 2;
+	(*passedEastNode) = passedDimensions + 3;
+	(*passedWestNode) = passedDimensions + 4;
+
+	// Connect internal board cells
+
+	// Connect board-side vertices to appropriate cells
+
+	cout << "\tBoard generated!" << endl;
+	return newGraph;
 }
 
 /**
  * Populates the board with the appropriate edges.
  */
-void populateBoard(Graph<Cell>* passedBoardGraph, int* passedNorthNode, int* passedSouthNode, int* passedEastNode, int* passedWestNode) {
+void populateBoard(Graph<Cell>* passedBoardGraph) {
 	cout << "Executing random moves on board...";
 
-	cout << "Board filled!";
+	cout << "\tBoard filled!";
 }
 
 /**
@@ -99,7 +115,6 @@ void getParameter(string passedString, T* passedType) {
  * Originally implemented for HW2, modified for HW4.
  */
 void dijkstraPath(Graph<Cell>* passedGraph, vector<int>* passedPathVector, char passedColor, int passedStartVertex, int passedEndVertex) {
-	cout << "Calculating path from vertex " << passedStartVertex << " to vertex " << passedEndVertex << "..." << endl;
 	// Initialize starting nodes
 	priority_queue<int> unvisited = priority_queue<int>();
 	bool visited[passedGraph->getVertexCount()];
