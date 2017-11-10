@@ -1,9 +1,9 @@
 /*********************************************************************
  * Graph.h
  * 
- * Assignment: hw3
+ * Assignment: hw4
  *
- * 10-2017
+ * 11-2017
  *
  * Graph class implementation. Uses matrix to track edges (connectivity
  * matrix implementation type), with the value stored in the matrix being
