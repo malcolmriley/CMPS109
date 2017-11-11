@@ -51,11 +51,10 @@ int getRandomInteger(int);
 void printString(string, int);
 
 // TODO: REMOVE! DEBUG!
-template<typename T>
-void printGraph(Graph<T>* passedGraph, ostream* passedStream) {
+void printGraph(Graph<Cell>* passedGraph, ostream* passedStream) {
 	if (passedGraph->getVertexCount() > 0) {
 		for (int ii = 0; ii < passedGraph->getVertexCount(); ii += 1) {
-			(*passedStream) << "Vertex\t( " << ii << " ) is adjacent to: " << endl;
+			(*passedStream) << "Vertex\t( " << ii << ": " << passedGraph->getVertex(ii)->color << " ) is adjacent to: " << endl;
 			for (int jj = 0; jj < passedGraph->getVertexCount(); jj += 1) {
 				if (passedGraph->adjacent(ii, jj)) {
 					(*passedStream) << "\t( " <<jj << " ), by edge with weight: " << passedGraph->getEdgeWeight(ii, jj) << endl;
@@ -86,6 +85,8 @@ int main() {
 	board.getVertex(EAST)->color = 'B';
 	board.getVertex(WEST)->color = 'B';
 
+	printGraph(&board, &cout);
+
 	printBoard(&board, boardDimensions);
 
 	if (checkWinner(&board, 'R', NORTH, SOUTH)) {
@@ -110,13 +111,13 @@ Graph<Cell> generateBoard(int passedDimension, int* passedNorthNode, int* passed
 	// Store indices of "special" board-side vertices
 	(*passedNorthNode) = (passedDimension * passedDimension) + 0;
 	(*passedSouthNode) = (passedDimension * passedDimension) + 1;
-	(*passedEastNode) = (passedDimension * passedDimension) + 2;
-	(*passedWestNode) = (passedDimension * passedDimension) + 3;
+	(*passedWestNode) = (passedDimension * passedDimension) + 2;
+	(*passedEastNode) = (passedDimension * passedDimension) + 3;
 
 	// Connect all internal board cells, except last 4 entries in Graph (reserved for special board-edge vertices)
 	for (int currentIndex = 0; currentIndex < (passedDimension * passedDimension); currentIndex += 1) {
 		// If not the first column, connect to previous index
-		if ((currentIndex % passedDimension) != 0) {
+		if ((currentIndex % passedDimension) > 0) {
 			int previousIndex = currentIndex - 1;
 			newGraph.addEdge(currentIndex, previousIndex);
 		}
@@ -124,6 +125,7 @@ Graph<Cell> generateBoard(int passedDimension, int* passedNorthNode, int* passed
 		if (currentIndex >= passedDimension) {
 			int topLeft = currentIndex - passedDimension;
 			newGraph.addEdge(currentIndex, topLeft);
+
 			// If not in the last column, also connect top right cell
 			if ((currentIndex % passedDimension) != (passedDimension - 1)) {
 				int topRight = currentIndex - (passedDimension - 1);
@@ -212,6 +214,11 @@ void printBoard(Graph<Cell>* passedBoardGraph, int passedBoardDimensions) {
 bool checkWinner(Graph<Cell>* passedBoardGraph, char passedColor, int passedStartIndex, int passedEndIndex) {
 	vector<int> pathVector = vector<int>();
 	dijkstraPath(passedBoardGraph, &pathVector, passedColor, passedStartIndex, passedEndIndex);
+	cout << "PATH: ";
+	for (int ii = 0; ii < pathVector.size(); ii += 1) {
+		cout << pathVector.at(ii) << " ";
+	}
+	cout << endl;
 	if (pathVector.size() > 2) {
 		if ((pathVector.at(0) == passedStartIndex) && (pathVector.at(pathVector.size() - 1) == passedEndIndex)) {
 			return true;
@@ -265,19 +272,21 @@ void dijkstraPath(Graph<Cell>* passedGraph, vector<int>* passedPathVector, char 
 		int currentVertex = unvisited.top();
 		unvisited.pop();
 		Cell* currentNode = passedGraph->getVertex(currentVertex);
-		visited[currentVertex] = true;
-		for (int ii = 0; ii < passedGraph->getVertexCount(); ii += 1) {
-			if (!visited[ii]) {
-				if (passedGraph->adjacent(currentVertex, ii) && (ii != currentVertex)) {
-					Cell* iteratedNode = passedGraph->getVertex(ii);
-					if (iteratedNode->color == passedColor) { // Only consider nodes of appropriate color
-						double traversalWeight = passedGraph->getEdgeWeight(currentVertex, ii) + currentNode->weight;
-						if (!visited[ii]) {
-							unvisited.push(ii);
-						}
-						if (traversalWeight < iteratedNode->weight) {
-							iteratedNode->weight = traversalWeight;
-							iteratedNode->predecessor = currentVertex;
+		if (currentNode->color == passedColor) {
+			visited[currentVertex] = true;
+			for (int ii = 0; ii < passedGraph->getVertexCount(); ii += 1) {
+				if (!visited[ii]) {
+					if (passedGraph->adjacent(currentVertex, ii) && (ii != currentVertex)) {
+						Cell* iteratedNode = passedGraph->getVertex(ii);
+						if (iteratedNode->color == passedColor) { // Only consider nodes of appropriate color
+							double traversalWeight = passedGraph->getEdgeWeight(currentVertex, ii) + currentNode->weight;
+							if (!visited[ii]) {
+								unvisited.push(ii);
+							}
+							if (traversalWeight < iteratedNode->weight) {
+								iteratedNode->weight = traversalWeight;
+								iteratedNode->predecessor = currentVertex;
+							}
 						}
 					}
 				}
