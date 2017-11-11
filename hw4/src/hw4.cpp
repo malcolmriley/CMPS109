@@ -45,7 +45,7 @@ void dijkstraPath(Graph<Cell>*, vector<int>*, char, int, int);
 Graph<Cell> generateBoard(int, int*, int*, int*, int*);
 void populateBoard(Graph<Cell>*);
 void printBoard(Graph<Cell>*, int);
-bool checkWinner(Graph<Cell>*, char);
+bool checkWinner(Graph<Cell>*, char, int, int);
 int getRandomInteger(int);
 void printString(string, int);
 
@@ -62,10 +62,10 @@ int main() {
 	Graph<Cell> board = generateBoard(boardDimensions, &NORTH, &SOUTH, &EAST, &WEST);
 	populateBoard(&board);
 
-	if (checkWinner(&board, 'R')) {
+	if (checkWinner(&board, 'R', NORTH, SOUTH)) {
 		cout << "Red Wins!" << endl << endl;
 	}
-	else if (checkWinner(&board, 'B')) {
+	else if (checkWinner(&board, 'B', EAST, WEST)) {
 		cout << "Blue Wins!" << endl << endl;
 	}
 	else {
@@ -80,7 +80,7 @@ Graph<Cell> generateBoard(int passedDimension, int* passedNorthNode, int* passed
 	cout << "Generating " << passedDimension << "x" << passedDimension << " board..." << endl;
 
 	// Instantiate new graph
-	Graph<Cell> newGraph = Graph<Cell>((passedDimension * passedDimension) + 4); // Four extra entries for special board-edge vertices
+	Graph<Cell> newGraph = Graph<Cell>((passedDimension * passedDimension) + 4, false); // Four extra entries for special board-edge vertices
 
 	// Store indices of "special" board-side vertices
 	(*passedNorthNode) = passedDimension + 1;
@@ -127,7 +127,7 @@ Graph<Cell> generateBoard(int passedDimension, int* passedNorthNode, int* passed
  * Populates the board with the appropriate edges.
  */
 void populateBoard(Graph<Cell>* passedBoardGraph) {
-	cout << "Executing random moves on board...";
+	cout << "Executing random moves on board..." << endl;
 	vector<int> cellsRemaining = vector<int>();
 
 	for (int ii = 0; ii < (passedBoardGraph->getVertexCount() - 4); ii += 1) { // Ignore special vertices
@@ -136,7 +136,7 @@ void populateBoard(Graph<Cell>* passedBoardGraph) {
 
 	int iteration = 0;
 	while(!cellsRemaining.empty()) {
-		int randomIndex = getRandomInteger(cellsRemaining.size());
+		int randomIndex = getRandomInteger(cellsRemaining.size() - 1);
 		char selectedColor = 'R';
 		if ((iteration % 2) == 0) {
 			selectedColor = 'B';
@@ -153,19 +153,19 @@ void populateBoard(Graph<Cell>* passedBoardGraph) {
  * Prints an ASCII representation of the board.
  */
 void printBoard(Graph<Cell>* passedBoardGraph, int passedBoardDimensions) {
+
+	// Print slashes
+	printString("/\\", passedBoardDimensions);
+	cout << endl;
+
 	for (int iteratedRow = 0; iteratedRow < passedBoardDimensions; iteratedRow += 1) { // Ignore special vertices
-
-		// Print slashes
-		printString(" ", iteratedRow); // Padding
-		printString("/\\", passedBoardDimensions);
-		cout << endl;
-
 		// Print row content
 		printString(" ", iteratedRow); // Padding
+		cout << "|";
 		for (int iteratedColumn = 0; iteratedColumn < passedBoardDimensions; iteratedColumn += 1) {
 			int iteratedCell = iteratedRow + iteratedColumn;
 			char cellColor = passedBoardGraph->getVertex(iteratedCell)->color;
-			cout << "|" << cellColor << "|";
+			cout << cellColor << "|";
 		}
 		cout << endl;
 		// Print slashes
@@ -238,7 +238,7 @@ void dijkstraPath(Graph<Cell>* passedGraph, vector<int>* passedPathVector, char 
 					Cell* iteratedNode = passedGraph->getVertex(ii);
 					double traversalWeight = DOUBLE_INFINITY; // Consider nodes of different color to have maximum possible traversal weight (untraversable)
 					if (iteratedNode->color == passedColor) {
-						double traversalWeight = passedGraph->getEdgeWeight(currentVertex, ii) + currentNode->weight;
+						traversalWeight = passedGraph->getEdgeWeight(currentVertex, ii) + currentNode->weight;
 					}
 					if (!visited[ii]) {
 						unvisited.push(ii);
