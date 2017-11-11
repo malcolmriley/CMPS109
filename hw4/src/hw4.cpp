@@ -12,6 +12,7 @@
  *********************************************************************/
 
 #include <cstdlib>
+#include <ctime>
 #include <iostream>
 #include <iterator>
 #include <limits>
@@ -49,8 +50,25 @@ bool checkWinner(Graph<Cell>*, char, int, int);
 int getRandomInteger(int);
 void printString(string, int);
 
-int main() {
+// TODO: REMOVE! DEBUG!
+template<typename T>
+void printGraph(Graph<T>* passedGraph, ostream* passedStream) {
+	if (passedGraph->getVertexCount() > 0) {
+		for (int ii = 0; ii < passedGraph->getVertexCount(); ii += 1) {
+			(*passedStream) << "Vertex\t( " << ii << " ) is adjacent to: " << endl;
+			for (int jj = 0; jj < passedGraph->getVertexCount(); jj += 1) {
+				if (passedGraph->adjacent(ii, jj)) {
+					(*passedStream) << "\t( " <<jj << " ), by edge with weight: " << passedGraph->getEdgeWeight(ii, jj) << endl;
+				}
+			}
+			(*passedStream) << endl;
+		}
+		(*passedStream) << endl;
+	}
+}
 
+int main() {
+	srand(time(NULL)); // Seed rand
 	int boardDimensions = MIN_BOARD_SIZE;
 	int NORTH, SOUTH, EAST, WEST;
 	getParameter("Please enter the dimension of the board:", &boardDimensions);
@@ -61,6 +79,14 @@ int main() {
 
 	Graph<Cell> board = generateBoard(boardDimensions, &NORTH, &SOUTH, &EAST, &WEST);
 	populateBoard(&board);
+
+	// Set NESW red and blue
+	board.getVertex(NORTH)->color = 'R';
+	board.getVertex(SOUTH)->color = 'R';
+	board.getVertex(EAST)->color = 'B';
+	board.getVertex(WEST)->color = 'B';
+
+	printGraph(&board, &cout);
 
 	if (checkWinner(&board, 'R', NORTH, SOUTH)) {
 		cout << "Red Wins!" << endl << endl;
@@ -83,10 +109,10 @@ Graph<Cell> generateBoard(int passedDimension, int* passedNorthNode, int* passed
 	Graph<Cell> newGraph = Graph<Cell>((passedDimension * passedDimension) + 4, false); // Four extra entries for special board-edge vertices
 
 	// Store indices of "special" board-side vertices
-	(*passedNorthNode) = passedDimension + 1;
-	(*passedSouthNode) = passedDimension + 2;
-	(*passedEastNode) = passedDimension + 3;
-	(*passedWestNode) = passedDimension + 4;
+	(*passedNorthNode) = (passedDimension * passedDimension) + 0;
+	(*passedSouthNode) = (passedDimension * passedDimension) + 1;
+	(*passedEastNode) = (passedDimension * passedDimension) + 2;
+	(*passedWestNode) = (passedDimension * passedDimension) + 3;
 
 	// Connect all internal board cells, except last 4 entries in Graph (reserved for special board-edge vertices)
 	for (int currentIndex = 0; currentIndex < (passedDimension * passedDimension); currentIndex += 1) {
@@ -138,7 +164,7 @@ void populateBoard(Graph<Cell>* passedBoardGraph) {
 	while(!cellsRemaining.empty()) {
 		int randomIndex = getRandomInteger(cellsRemaining.size() - 1);
 		char selectedColor = 'R';
-		if ((iteration % 2) == 0) {
+		if ((iteration % 2) == 1) {
 			selectedColor = 'B';
 		}
 		passedBoardGraph->getVertex(cellsRemaining.at(randomIndex))->color = selectedColor;
@@ -171,6 +197,9 @@ void printBoard(Graph<Cell>* passedBoardGraph, int passedBoardDimensions) {
 		// Print slashes
 		printString(" ", iteratedRow); // Padding
 		printString("\\/", passedBoardDimensions);
+		if (iteratedRow != (passedBoardDimensions - 1)) {
+			cout << "\\";
+		}
 		cout << endl;
 	}
 }
@@ -181,9 +210,17 @@ void printBoard(Graph<Cell>* passedBoardGraph, int passedBoardDimensions) {
 bool checkWinner(Graph<Cell>* passedBoardGraph, char passedColor, int passedStartIndex, int passedEndIndex) {
 	vector<int> pathVector = vector<int>();
 	dijkstraPath(passedBoardGraph, &pathVector, passedColor, passedStartIndex, passedEndIndex);
-	if ((pathVector.at(0) == passedEndIndex) && (pathVector.at(pathVector.size() - 1) == passedStartIndex)) {
-		return true;
+	// TODO: Remove, debug!
+	cout << "PATH: ";
+	for (int ii = 0; ii < pathVector.size(); ii += 1) {
+		cout << pathVector.at(ii) << " ";
 	}
+	if (pathVector.size() > 2) {
+		if ((pathVector.at(0) == passedStartIndex) && (pathVector.at(pathVector.size() - 1) == passedEndIndex)) {
+			return true;
+		}
+	}
+	cout << endl;
 	return false;
 }
 
@@ -236,16 +273,15 @@ void dijkstraPath(Graph<Cell>* passedGraph, vector<int>* passedPathVector, char 
 			if (!visited[ii]) {
 				if (passedGraph->adjacent(currentVertex, ii) && (ii != currentVertex)) {
 					Cell* iteratedNode = passedGraph->getVertex(ii);
-					double traversalWeight = DOUBLE_INFINITY; // Consider nodes of different color to have maximum possible traversal weight (untraversable)
-					if (iteratedNode->color == passedColor) {
-						traversalWeight = passedGraph->getEdgeWeight(currentVertex, ii) + currentNode->weight;
-					}
-					if (!visited[ii]) {
-						unvisited.push(ii);
-					}
-					if (traversalWeight < iteratedNode->weight) {
-						iteratedNode->weight = traversalWeight;
-						iteratedNode->predecessor = currentVertex;
+					if (iteratedNode->color == passedColor) { // Only consider nodes of appropriate color
+						double traversalWeight = passedGraph->getEdgeWeight(currentVertex, ii) + currentNode->weight;
+						if (!visited[ii]) {
+							unvisited.push(ii);
+						}
+						if (traversalWeight < iteratedNode->weight) {
+							iteratedNode->weight = traversalWeight;
+							iteratedNode->predecessor = currentVertex;
+						}
 					}
 				}
 			}
