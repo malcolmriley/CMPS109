@@ -146,7 +146,7 @@ void populateBoard(Graph<Cell>* passedBoardGraph) {
 		iteration += 1;
 	}
 
-	cout << "\tBoard filled!";
+	cout << "\tBoard filled!" << endl;
 }
 
 /**
