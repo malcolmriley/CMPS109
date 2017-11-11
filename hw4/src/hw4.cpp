@@ -13,6 +13,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <iterator>
 #include <limits>
 #include <queue>
 #include <vector>
@@ -43,7 +44,10 @@ void getParameter(string, T*);
 void dijkstraPath(Graph<Cell>*, vector<int>*, char, int, int);
 Graph<Cell> generateBoard(int, int*, int*, int*, int*);
 void populateBoard(Graph<Cell>*);
-void printBoard(Graph<Cell>*);
+void printBoard(Graph<Cell>*, int);
+bool checkWinner(Graph<Cell>*, char);
+int getRandomInteger(int);
+void printString(string, int);
 
 int main() {
 
@@ -56,25 +60,64 @@ int main() {
 	}
 
 	Graph<Cell> board = generateBoard(boardDimensions, &NORTH, &SOUTH, &EAST, &WEST);
+	populateBoard(&board);
+
+	if (checkWinner(&board, 'R')) {
+		cout << "Red Wins!" << endl << endl;
+	}
+	else if (checkWinner(&board, 'B')) {
+		cout << "Blue Wins!" << endl << endl;
+	}
+	else {
+		cout << "Game is a draw!" << endl << endl;
+	}
+	printBoard(&board, boardDimensions);
 
 	return 0;
 }
 
-Graph<Cell> generateBoard(int passedDimensions, int* passedNorthNode, int* passedSouthNode, int* passedEastNode, int* passedWestNode) {
-	cout << "Generating " << passedDimensions << "x" << passedDimensions << " board..." << endl;
+Graph<Cell> generateBoard(int passedDimension, int* passedNorthNode, int* passedSouthNode, int* passedEastNode, int* passedWestNode) {
+	cout << "Generating " << passedDimension << "x" << passedDimension << " board..." << endl;
 
 	// Instantiate new graph
-	Graph<Cell> newGraph = Graph<Cell>(passedDimensions + 4);
+	Graph<Cell> newGraph = Graph<Cell>((passedDimension * passedDimension) + 4); // Four extra entries for special board-edge vertices
 
 	// Store indices of "special" board-side vertices
-	(*passedNorthNode) = passedDimensions + 1;
-	(*passedSouthNode) = passedDimensions + 2;
-	(*passedEastNode) = passedDimensions + 3;
-	(*passedWestNode) = passedDimensions + 4;
+	(*passedNorthNode) = passedDimension + 1;
+	(*passedSouthNode) = passedDimension + 2;
+	(*passedEastNode) = passedDimension + 3;
+	(*passedWestNode) = passedDimension + 4;
 
-	// Connect internal board cells
+	// Connect all internal board cells, except last 4 entries in Graph (reserved for special board-edge vertices)
+	for (int currentIndex = 0; currentIndex < (passedDimension * passedDimension); currentIndex += 1) {
+		// If not the first column, connect to previous index
+		if ((currentIndex % passedDimension) != 0) {
+			int previousIndex = currentIndex - 1;
+			newGraph.addEdge(currentIndex, previousIndex);
+		}
+		// If not the first row, connect to top left and top right cells
+		if (currentIndex >= passedDimension) {
+			int topLeft = currentIndex - passedDimension;
+			newGraph.addEdge(currentIndex, topLeft);
+			// If not in the last column, also connect top right cell
+			if ((currentIndex % passedDimension) != (passedDimension - 1)) {
+				int topRight = currentIndex - (passedDimension - 1);
+				newGraph.addEdge(currentIndex, topRight);
+			}
+		}
+	}
 
-	// Connect board-side vertices to appropriate cells
+	// Connect special board-edge vertices
+	for (int currentIndex = 0; currentIndex < passedDimension; currentIndex += 1) {
+		int iteratedNorthEdge = (currentIndex); // First row
+		int iteratedSouthEdge = (currentIndex) + (passedDimension * (passedDimension - 1)); // Last row
+		int iteratedEastEdge = (currentIndex * passedDimension) + (passedDimension - 1); // Last index of each row
+		int iteratedWestEdge = (currentIndex * passedDimension); // First index of each row
+		newGraph.addEdge((*passedNorthNode), iteratedNorthEdge);
+		newGraph.addEdge((*passedSouthNode), iteratedSouthEdge);
+		newGraph.addEdge((*passedEastNode), iteratedEastEdge);
+		newGraph.addEdge((*passedWestNode), iteratedWestEdge);
+	}
 
 	cout << "\tBoard generated!" << endl;
 	return newGraph;
@@ -85,6 +128,23 @@ Graph<Cell> generateBoard(int passedDimensions, int* passedNorthNode, int* passe
  */
 void populateBoard(Graph<Cell>* passedBoardGraph) {
 	cout << "Executing random moves on board...";
+	vector<int> cellsRemaining = vector<int>();
+
+	for (int ii = 0; ii < (passedBoardGraph->getVertexCount() - 4); ii += 1) { // Ignore special vertices
+		cellsRemaining.push_back(ii);
+	}
+
+	int iteration = 0;
+	while(!cellsRemaining.empty()) {
+		int randomIndex = getRandomInteger(cellsRemaining.size());
+		char selectedColor = 'R';
+		if ((iteration % 2) == 0) {
+			selectedColor = 'B';
+		}
+		passedBoardGraph->getVertex(cellsRemaining.at(randomIndex))->color = selectedColor;
+		cellsRemaining.erase(cellsRemaining.begin() + randomIndex);
+		iteration += 1;
+	}
 
 	cout << "\tBoard filled!";
 }
@@ -92,8 +152,48 @@ void populateBoard(Graph<Cell>* passedBoardGraph) {
 /**
  * Prints an ASCII representation of the board.
  */
-void printBoard(Graph<Cell>* passedBoardGraph) {
+void printBoard(Graph<Cell>* passedBoardGraph, int passedBoardDimensions) {
+	for (int iteratedRow = 0; iteratedRow < passedBoardDimensions; iteratedRow += 1) { // Ignore special vertices
 
+		// Print slashes
+		printString(" ", iteratedRow); // Padding
+		printString("/\\", passedBoardDimensions);
+		cout << endl;
+
+		// Print row content
+		printString(" ", iteratedRow); // Padding
+		for (int iteratedColumn = 0; iteratedColumn < passedBoardDimensions; iteratedColumn += 1) {
+			int iteratedCell = iteratedRow + iteratedColumn;
+			char cellColor = passedBoardGraph->getVertex(iteratedCell)->color;
+			cout << "|" << cellColor << "|";
+		}
+		cout << endl;
+		// Print slashes
+		printString(" ", iteratedRow); // Padding
+		printString("\\/", passedBoardDimensions);
+		cout << endl;
+	}
+}
+
+/**
+ * Checks whether the player of the indicated color has a path from the start vertex index to the end vertex index.
+ */
+bool checkWinner(Graph<Cell>* passedBoardGraph, char passedColor, int passedStartIndex, int passedEndIndex) {
+	vector<int> pathVector = vector<int>();
+	dijkstraPath(passedBoardGraph, &pathVector, passedColor, passedStartIndex, passedEndIndex);
+	if ((pathVector.at(0) == passedEndIndex) && (pathVector.at(pathVector.size() - 1) == passedStartIndex)) {
+		return true;
+	}
+	return false;
+}
+
+/**
+ * Prints the passed string a number of times.
+ */
+void printString(string passedString, int passedSpaceCount) {
+	for (int ii = 0; ii < passedSpaceCount; ii += 1) {
+		cout << passedString;
+	}
 }
 
 
