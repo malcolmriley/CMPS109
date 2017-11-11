@@ -7,8 +7,15 @@
  *
  * Implementation file for CMPS109 HW4: Hex Board and Win Calculation
  *
- * Note to grader:
- *
+ * Notes to grader:
+ * - Graph population algorithm is in populateBoard.
+ * - Dijkstra path is checked via checkWinner and djkstraPath.
+ * - Debug functionality is deliberately left in for verification
+ * purposes. Print out the debug info to see a printout of the graph
+ * in total.
+ * - There are 4 extra nodes! These are for convenience, it makes
+ * it easier to check paths from each side if there's just a node
+ * connected to all nodes on each side, no?
  *********************************************************************/
 
 #include <cstdlib>
@@ -46,35 +53,23 @@ void dijkstraPath(Graph<Cell>*, vector<int>*, char, int, int);
 Graph<Cell> generateBoard(int, int*, int*, int*, int*);
 void populateBoard(Graph<Cell>*);
 void printBoard(Graph<Cell>*, int);
-bool checkWinner(Graph<Cell>*, char, int, int);
+bool checkWinner(Graph<Cell>*, char, int, int, bool);
 int getRandomInteger(int);
 void printString(string, int);
-
-// TODO: REMOVE! DEBUG!
-void printGraph(Graph<Cell>* passedGraph, ostream* passedStream) {
-	if (passedGraph->getVertexCount() > 0) {
-		for (int ii = 0; ii < passedGraph->getVertexCount(); ii += 1) {
-			(*passedStream) << "Vertex\t( " << ii << ": " << passedGraph->getVertex(ii)->color << " ) is adjacent to: " << endl;
-			for (int jj = 0; jj < passedGraph->getVertexCount(); jj += 1) {
-				if (passedGraph->adjacent(ii, jj)) {
-					(*passedStream) << "\t( " <<jj << " ), by edge with weight: " << passedGraph->getEdgeWeight(ii, jj) << endl;
-				}
-			}
-			(*passedStream) << endl;
-		}
-		(*passedStream) << endl;
-	}
-}
+void printGraph(Graph<Cell>*, ostream* passedStream);
 
 int main() {
 	srand(time(NULL)); // Seed rand
 	int boardDimensions = MIN_BOARD_SIZE;
 	int NORTH, SOUTH, EAST, WEST;
+	char printDebug;
 	getParameter("Please enter the dimension of the board:", &boardDimensions);
 	while (boardDimensions < MIN_BOARD_SIZE) {
 		cout << "Minimum board dimension should be greater than two.";
 		getParameter("Please enter the dimension of the board:", &boardDimensions);
 	}
+	getParameter("Print debug info? (y/n):", &printDebug);
+	bool debug = ((printDebug == 'Y') || (printDebug == 'y'));
 
 	Graph<Cell> board = generateBoard(boardDimensions, &NORTH, &SOUTH, &EAST, &WEST);
 	populateBoard(&board);
@@ -85,14 +80,15 @@ int main() {
 	board.getVertex(EAST)->color = 'B';
 	board.getVertex(WEST)->color = 'B';
 
-	printGraph(&board, &cout);
-
+	if (debug) {
+		printGraph(&board, &cout);
+	}
 	printBoard(&board, boardDimensions);
 
-	if (checkWinner(&board, 'R', NORTH, SOUTH)) {
+	if (checkWinner(&board, 'R', NORTH, SOUTH, debug)) {
 		cout << "Red Wins!" << endl << endl;
 	}
-	else if (checkWinner(&board, 'B', EAST, WEST)) {
+	else if (checkWinner(&board, 'B', EAST, WEST, debug)) {
 		cout << "Blue Wins!" << endl << endl;
 	}
 	else {
@@ -191,7 +187,7 @@ void printBoard(Graph<Cell>* passedBoardGraph, int passedBoardDimensions) {
 		printString(" ", iteratedRow); // Padding
 		cout << "|";
 		for (int iteratedColumn = 0; iteratedColumn < passedBoardDimensions; iteratedColumn += 1) {
-			int iteratedCell = iteratedRow + iteratedColumn;
+			int iteratedCell = (iteratedRow * passedBoardDimensions) + iteratedColumn;
 			char cellColor = passedBoardGraph->getVertex(iteratedCell)->color;
 			cout << cellColor << "|";
 		}
@@ -211,14 +207,21 @@ void printBoard(Graph<Cell>* passedBoardGraph, int passedBoardDimensions) {
 /**
  * Checks whether the player of the indicated color has a path from the start vertex index to the end vertex index.
  */
-bool checkWinner(Graph<Cell>* passedBoardGraph, char passedColor, int passedStartIndex, int passedEndIndex) {
+bool checkWinner(Graph<Cell>* passedBoardGraph, char passedColor, int passedStartIndex, int passedEndIndex, bool passedDebug) {
 	vector<int> pathVector = vector<int>();
 	dijkstraPath(passedBoardGraph, &pathVector, passedColor, passedStartIndex, passedEndIndex);
-	cout << "PATH: ";
-	for (int ii = 0; ii < pathVector.size(); ii += 1) {
-		cout << pathVector.at(ii) << " ";
+
+	if (passedDebug) {
+		cout << "PATH: ";
+		for (int ii = 0; ii < pathVector.size(); ii += 1) {
+			cout << "(" << pathVector.at(ii) << " " << passedBoardGraph->getVertex(pathVector.at(ii))->color << ")";
+			if (ii < (pathVector.size() - 1)) {
+				cout << " -> ";
+			}
+		}
+		cout << endl;
 	}
-	cout << endl;
+
 	if (pathVector.size() > 2) {
 		if ((pathVector.at(0) == passedStartIndex) && (pathVector.at(pathVector.size() - 1) == passedEndIndex)) {
 			return true;
@@ -301,6 +304,30 @@ void dijkstraPath(Graph<Cell>* passedGraph, vector<int>* passedPathVector, char 
 		iteratedVertex = passedGraph->getVertex(iteratedVertex)->predecessor;
 	}
 	passedPathVector->insert(passedPathVector->begin(), passedStartVertex);
+
+	// Reset weights and predecessors
+	for (int ii = 0; ii < passedGraph->getVertexCount(); ii += 1) {
+		passedGraph->getVertex(ii)->predecessor = -1;
+		passedGraph->getVertex(ii)->weight = DOUBLE_INFINITY;
+	}
+}
+
+/**
+ * Prints the graph.
+ */
+void printGraph(Graph<Cell>* passedGraph, ostream* passedStream) {
+	if (passedGraph->getVertexCount() > 0) {
+		for (int ii = 0; ii < passedGraph->getVertexCount(); ii += 1) {
+			(*passedStream) << "Vertex\t( " << ii << ": " << passedGraph->getVertex(ii)->color << " ) is adjacent to: " << endl;
+			for (int jj = 0; jj < passedGraph->getVertexCount(); jj += 1) {
+				if (passedGraph->adjacent(ii, jj)) {
+					(*passedStream) << "\t( " <<jj << " ), by edge with weight: " << passedGraph->getEdgeWeight(ii, jj) << endl;
+				}
+			}
+			(*passedStream) << endl;
+		}
+		(*passedStream) << endl;
+	}
 }
 
 /**
