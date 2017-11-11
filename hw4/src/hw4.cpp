@@ -86,7 +86,7 @@ int main() {
 	board.getVertex(EAST)->color = 'B';
 	board.getVertex(WEST)->color = 'B';
 
-	printGraph(&board, &cout);
+	printBoard(&board, boardDimensions);
 
 	if (checkWinner(&board, 'R', NORTH, SOUTH)) {
 		cout << "Red Wins!" << endl << endl;
@@ -97,7 +97,6 @@ int main() {
 	else {
 		cout << "Game is a draw!" << endl << endl;
 	}
-	printBoard(&board, boardDimensions);
 
 	return 0;
 }
@@ -179,6 +178,7 @@ void populateBoard(Graph<Cell>* passedBoardGraph) {
  * Prints an ASCII representation of the board.
  */
 void printBoard(Graph<Cell>* passedBoardGraph, int passedBoardDimensions) {
+	cout << endl;
 
 	// Print slashes
 	printString("/\\", passedBoardDimensions);
@@ -194,6 +194,7 @@ void printBoard(Graph<Cell>* passedBoardGraph, int passedBoardDimensions) {
 			cout << cellColor << "|";
 		}
 		cout << endl;
+
 		// Print slashes
 		printString(" ", iteratedRow); // Padding
 		printString("\\/", passedBoardDimensions);
@@ -202,6 +203,7 @@ void printBoard(Graph<Cell>* passedBoardGraph, int passedBoardDimensions) {
 		}
 		cout << endl;
 	}
+	cout << endl;
 }
 
 /**
@@ -210,11 +212,6 @@ void printBoard(Graph<Cell>* passedBoardGraph, int passedBoardDimensions) {
 bool checkWinner(Graph<Cell>* passedBoardGraph, char passedColor, int passedStartIndex, int passedEndIndex) {
 	vector<int> pathVector = vector<int>();
 	dijkstraPath(passedBoardGraph, &pathVector, passedColor, passedStartIndex, passedEndIndex);
-	// TODO: Remove, debug!
-	cout << "PATH: ";
-	for (int ii = 0; ii < pathVector.size(); ii += 1) {
-		cout << pathVector.at(ii) << " ";
-	}
 	if (pathVector.size() > 2) {
 		if ((pathVector.at(0) == passedStartIndex) && (pathVector.at(pathVector.size() - 1) == passedEndIndex)) {
 			return true;
