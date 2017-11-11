@@ -182,7 +182,7 @@ void printBoard(Graph<Cell>* passedBoardGraph, int passedBoardDimensions) {
 	printString("/\\", passedBoardDimensions);
 	cout << endl;
 
-	for (int iteratedRow = 0; iteratedRow < passedBoardDimensions; iteratedRow += 1) { // Ignore special vertices
+	for (int iteratedRow = 0; iteratedRow < passedBoardDimensions; iteratedRow += 1) {
 		// Print row content
 		printString(" ", iteratedRow); // Padding
 		cout << "|";
