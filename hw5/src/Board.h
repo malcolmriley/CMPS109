@@ -122,8 +122,32 @@ Board::Board(int passedSize, char passedFirstPlayerColor, char passedSecondPlaye
 }
 
 /* Accessors */
+char Board::getFirstPlayerColor() {
+	return COLOR_PLAYER1;
+}
+
+char Board::getSecondPlayerColor() {
+	return COLOR_PLAYER2;
+}
+
+int Board::getNorthVertex() {
+	return NORTH;
+}
+
+int Board::getSouthVertex() {
+	return SOUTH;
+}
+
+int Board::getEastVertex() {
+	return EAST;
+}
+
+int Board::getWestVertex() {
+	return WEST;
+}
 
 /* Miscellaneous */
+
 /**
  * Checks whether the player of the indicated color has a path from the start vertex index to the end vertex index.
  */
