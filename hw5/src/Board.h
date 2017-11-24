@@ -9,15 +9,17 @@
 #ifndef BOARD_H_HW5
 #define BOARD_H_HW5
 
+#include "Board.h"
+#include "Graph.h"
+
 #include <iostream>
 #include <limits>
+#include <vector>
+#include <queue>
 
 using namespace std;
 
-#include "Graph.h"
-
 #define DOUBLE_INFINITY std::numeric_limits<double>::max()
-#define MIN_BOARD_SIZE 2
 
 // Utility functions
 void printString(ostream*, string, int);
@@ -50,10 +52,23 @@ public:
 	Board(int, char, char);
 	virtual ~Board();
 
+	// Accessors
+	char getFirstPlayerColor();
+	char getSecondPlayerColor();
+	int getNorthVertex();
+	int getSouthVertex();
+	int getEastVertex();
+	int getWestVertex();
+
 	// Miscellaneous
 	void printBoard(ostream*);
+	bool checkWinner(char, int, int);
+	void dijkstraPath(vector<int>*, char, int, int);
 };
 
+/**
+ * Initializes the main board.
+ */
 Graph<Cell> initBoard(int passedDimension, int* passedNorthNode, int* passedSouthNode, int* passedEastNode, int* passedWestNode) {
 	// Instantiate new graph
 	Graph<Cell> newGraph = Graph<Cell>((passedDimension * passedDimension) + 4, false); // Four extra entries for special board-edge vertices
@@ -106,6 +121,85 @@ Board::Board(int passedSize, char passedFirstPlayerColor, char passedSecondPlaye
 	BOARD_REPRESENTATION = initBoard(SIZE, &NORTH, &SOUTH, &EAST, &WEST);
 }
 
+/* Accessors */
+
+/* Miscellaneous */
+/**
+ * Checks whether the player of the indicated color has a path from the start vertex index to the end vertex index.
+ */
+bool Board::checkWinner(char passedColor, int passedStartIndex, int passedEndIndex) {
+	vector<int> pathVector = vector<int>();
+	Board::dijkstraPath(&pathVector, passedColor, passedStartIndex, passedEndIndex);
+
+	if (pathVector.size() > 2) {
+		if ((pathVector.at(0) == passedStartIndex) && (pathVector.at(pathVector.size() - 1) == passedEndIndex)) {
+			return true;
+		}
+	}
+	cout << endl;
+	return false;
+}
+
+/**
+ * Calculates the shortest path through the Graph, using Dijkstra's Algorithm, returning
+ * the result as an ordered sequence of entries in a vector.
+ *
+ * Originally implemented for HW2, modified for HW4.
+ */
+void Board::dijkstraPath(vector<int>* passedPathVector, char passedColor, int passedStartVertex, int passedEndVertex) {
+	// Initialize starting nodes
+	priority_queue<int> unvisited = priority_queue<int>();
+	bool visited[BOARD_REPRESENTATION.getVertexCount()];
+	for (int ii = 0; ii < BOARD_REPRESENTATION.getVertexCount(); ii += 1) {
+		visited[ii] = false;
+	}
+	visited[passedStartVertex] = true;
+	BOARD_REPRESENTATION.getVertex(passedStartVertex)->weight = 0;
+	BOARD_REPRESENTATION.getVertex(passedStartVertex)->predecessor = passedStartVertex;
+	unvisited.push(passedStartVertex);
+
+	// Begin algorithm proper
+	while (!unvisited.empty()) {
+		int currentVertex = unvisited.top();
+		unvisited.pop();
+		Cell* currentNode = BOARD_REPRESENTATION.getVertex(currentVertex);
+		if (currentNode->color == passedColor) {
+			visited[currentVertex] = true;
+			for (int ii = 0; ii < BOARD_REPRESENTATION.getVertexCount(); ii += 1) {
+				if (!visited[ii]) {
+					if (BOARD_REPRESENTATION.adjacent(currentVertex, ii) && (ii != currentVertex)) {
+						Cell* iteratedNode = BOARD_REPRESENTATION.getVertex(ii);
+						if (iteratedNode->color == passedColor) { // Only consider nodes of appropriate color
+							double traversalWeight = BOARD_REPRESENTATION.getEdgeWeight(currentVertex, ii) + currentNode->weight;
+							if (!visited[ii]) {
+								unvisited.push(ii);
+							}
+							if (traversalWeight < iteratedNode->weight) {
+								iteratedNode->weight = traversalWeight;
+								iteratedNode->predecessor = currentVertex;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Add discovered path to path vector
+	int iteratedVertex = passedEndVertex;
+	while ((iteratedVertex >= 0) && (iteratedVertex != passedStartVertex)) {
+		passedPathVector->insert(passedPathVector->begin(), iteratedVertex);
+		iteratedVertex = BOARD_REPRESENTATION.getVertex(iteratedVertex)->predecessor;
+	}
+	passedPathVector->insert(passedPathVector->begin(), passedStartVertex);
+
+	// Reset weights and predecessors
+	for (int ii = 0; ii < BOARD_REPRESENTATION.getVertexCount(); ii += 1) {
+		BOARD_REPRESENTATION.getVertex(ii)->predecessor = -1;
+		BOARD_REPRESENTATION.getVertex(ii)->weight = DOUBLE_INFINITY;
+	}
+}
+
 /**
  * Prints an ASCII representation of the board.
  */
@@ -113,9 +207,12 @@ void Board::printBoard(ostream* passedStream) {
 	(*passedStream) << endl;
 
 	// Print Coordinate Header
+	(*passedStream) << "\t";
 	for (char iteratedRow = 0; iteratedRow < SIZE; iteratedRow += 1) {
-
+		(*passedStream) << iteratedRow;
+		printString(passedStream, " ", 3);
 	}
+	(*passedStream) << endl;
 
 	// Print slashes
 	printString(passedStream, " /\\ ", SIZE);
@@ -123,6 +220,9 @@ void Board::printBoard(ostream* passedStream) {
 	(*passedStream) << endl;
 
 	for (int iteratedRow = 0; iteratedRow < SIZE; iteratedRow += 1) {
+		// Print coordinate header
+		(*passedStream) << iteratedRow << "\t";
+
 		// Print row content
 		printString(passedStream, " ", iteratedRow); // Padding
 		(*passedStream) << "| ";
@@ -144,6 +244,8 @@ void Board::printBoard(ostream* passedStream) {
 	}
 	(*passedStream) << endl;
 }
+
+/* Utility Functions */
 
 /**
  * Prints the passed string a number of times.
