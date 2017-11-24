@@ -57,6 +57,7 @@ public:
 	Board(int, char, char);
 
 	// Accessors
+	char getCellColor(int);
 	char getFirstPlayerColor();
 	char getSecondPlayerColor();
 	int getNorthVertex();
@@ -126,6 +127,10 @@ Board::Board(int passedSize, char passedFirstPlayerColor, char passedSecondPlaye
 }
 
 /* Accessors */
+char Board::getCellColor(int passedVertexID) {
+	return this->BOARD_REPRESENTATION.getVertex(passedVertexID)->color;
+}
+
 char Board::getFirstPlayerColor() {
 	return COLOR_PLAYER1;
 }
