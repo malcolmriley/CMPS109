@@ -65,6 +65,9 @@ public:
 	int getWestVertex();
 	int getCellCount();
 
+	// Manipulators
+	void setCell(char, int);
+
 	// Miscellaneous
 	void printBoard(ostream*);
 	bool checkWinner(char, int, int);
@@ -149,6 +152,14 @@ int Board::getWestVertex() {
 
 int Board::getCellCount() {
 	return SIZE * SIZE;
+}
+
+/* Manipulators */
+void Board::setCell(char passedColor, int passedVertexID) {
+	if ((passedColor == this->getFirstPlayerColor()) || (passedColor == this->getSecondPlayerColor())) {
+		Cell cell = this->BOARD_REPRESENTATION.getVertex(passedVertexID);
+		cell.color = passedColor;
+	}
 }
 
 /* Miscellaneous */
