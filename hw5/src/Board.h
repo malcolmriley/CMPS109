@@ -59,6 +59,7 @@ public:
 	int getSouthVertex();
 	int getEastVertex();
 	int getWestVertex();
+	int getCellCount();
 
 	// Miscellaneous
 	void printBoard(ostream*);
@@ -144,6 +145,10 @@ int Board::getEastVertex() {
 
 int Board::getWestVertex() {
 	return WEST;
+}
+
+int Board::getCellCount() {
+	return SIZE * SIZE;
 }
 
 /* Miscellaneous */
