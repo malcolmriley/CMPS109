@@ -110,39 +110,39 @@ Board::Board(int passedSize, char passedFirstPlayerColor, char passedSecondPlaye
  * Prints an ASCII representation of the board.
  */
 void Board::printBoard(ostream* passedStream) {
-	cout << endl;
+	(*passedStream) << endl;
 
 	// Print Coordinate Header
-	for (int iteratedRow = 0; iteratedRow < SIZE; iteratedRow += 1) {
+	for (char iteratedRow = 0; iteratedRow < SIZE; iteratedRow += 1) {
 
 	}
 
 	// Print slashes
 	printString(passedStream, " /\\ ", SIZE);
 	printString(passedStream, "/  \\", SIZE);
-	cout << endl;
+	(*passedStream) << endl;
 
 	for (int iteratedRow = 0; iteratedRow < SIZE; iteratedRow += 1) {
 		// Print row content
 		printString(passedStream, " ", iteratedRow); // Padding
-		cout << "| ";
+		(*passedStream) << "| ";
 		for (int iteratedColumn = 0; iteratedColumn < SIZE; iteratedColumn += 1) {
 			int iteratedCell = (iteratedRow * SIZE) + iteratedColumn;
 			char cellColor = BOARD_REPRESENTATION.getVertex(iteratedCell)->color;
-			cout << cellColor << " |";
+			(*passedStream) << cellColor << " |";
 		}
-		cout << endl;
+		(*passedStream) << endl;
 
 		// Print slashes
 		printString(passedStream, " ", iteratedRow); // Padding
 		printString(passedStream, "\\  /", SIZE);
 		printString(passedStream, " \\/ ", SIZE);
 		if (iteratedRow != (SIZE - 1)) {
-			cout << "\\";
+			(*passedStream) << "\\";
 		}
-		cout << endl;
+		(*passedStream) << endl;
 	}
-	cout << endl;
+	(*passedStream) << endl;
 }
 
 /**
