@@ -118,6 +118,7 @@ void Board::printBoard(ostream* passedStream) {
 	}
 
 	// Print slashes
+	printString(passedStream, " /\\ ", SIZE);
 	printString(passedStream, "/  \\", SIZE);
 	cout << endl;
 
@@ -135,6 +136,7 @@ void Board::printBoard(ostream* passedStream) {
 		// Print slashes
 		printString(passedStream, " ", iteratedRow); // Padding
 		printString(passedStream, "\\  /", SIZE);
+		printString(passedStream, " \\/ ", SIZE);
 		if (iteratedRow != (SIZE - 1)) {
 			cout << "\\";
 		}
