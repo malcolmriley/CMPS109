@@ -118,23 +118,23 @@ void Board::printBoard(ostream* passedStream) {
 	}
 
 	// Print slashes
-	printString(passedStream, "/\\", SIZE);
+	printString(passedStream, "/  \\", SIZE);
 	cout << endl;
 
 	for (int iteratedRow = 0; iteratedRow < SIZE; iteratedRow += 1) {
 		// Print row content
 		printString(passedStream, " ", iteratedRow); // Padding
-		cout << "|";
+		cout << "| ";
 		for (int iteratedColumn = 0; iteratedColumn < SIZE; iteratedColumn += 1) {
 			int iteratedCell = (iteratedRow * SIZE) + iteratedColumn;
 			char cellColor = BOARD_REPRESENTATION.getVertex(iteratedCell)->color;
-			cout << cellColor << "|";
+			cout << cellColor << " |";
 		}
 		cout << endl;
 
 		// Print slashes
 		printString(passedStream, " ", iteratedRow); // Padding
-		printString(passedStream, "\\/", SIZE);
+		printString(passedStream, "\\  /", SIZE);
 		if (iteratedRow != (SIZE - 1)) {
 			cout << "\\";
 		}
