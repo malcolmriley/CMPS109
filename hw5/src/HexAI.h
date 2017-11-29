@@ -22,11 +22,12 @@ private:
 	int* EVALUATION;
 	char MY_COLOR;
 	char OPPONENT_COLOR;
-	int MY_FIRST_SIDE, MY_SECOND_SIDE, OPONENT_FIRST_SIDE, OPONENT_SECOND_SIDE;
+	int MY_FIRST_SIDE, MY_SECOND_SIDE, OPPONENT_FIRST_SIDE, OPPONENT_SECOND_SIDE;
 
 	// Internal Functions
 	void resetEvaluations();
 	void evaluatePaths(vector<int>*, char);
+	void pathToSide(int, int);
 public:
 	// Constructor / Destructor
 	HexAI(Board*, char, char, int, int, int, int);
@@ -45,8 +46,8 @@ HexAI::HexAI(Board* passedBoardReference, char passedMyColor, char passedOpponen
 	this->OPPONENT_COLOR = passedOpponentColor;
 	this->MY_FIRST_SIDE = passedMyFirstSide;
 	this->MY_SECOND_SIDE = passedMySecondSide;
-	this->OPONENT_FIRST_SIDE = passedOponentFirstSide;
-	this->OPONENT_SECOND_SIDE = passedOponentSecondSide;
+	this->OPPONENT_FIRST_SIDE = passedOponentFirstSide;
+	this->OPPONENT_SECOND_SIDE = passedOponentSecondSide;
 	this->resetEvaluations();
 }
 
@@ -59,23 +60,30 @@ void HexAI::evaulateBoard() {
 	this->resetEvaluations();
 
 	// Build board representation
-	vector<int> myPieces = vector<int>();
 	vector<int> opponentPieces = vector<int>();
 	for (int ii = 0; ii < this->BOARD_REFERENCE->getCellCount(); ii += 1) {
 		char cellColor = this->BOARD_REFERENCE->getCellColor(ii);
 		if (cellColor != ' ') {
-			if (cellColor == this->MY_COLOR) {
-				myPieces.push_back(ii);
-			}
-			else {
+			if (cellColor == this->OPPONENT_COLOR) {
 				opponentPieces.push_back(ii);
 			}
 		}
 	}
 
-	// Evaluate possible opponent paths
+	// Evaluate possible opponent paths for each piece to each side
+	for (int ii = 0; ii < opponentPieces.size(); ii += 1) {
+		int iteratedCell = opponentPieces.at(ii);
+		this->pathToSide(iteratedCell, this->OPPONENT_FIRST_SIDE);
+		this->pathToSide(iteratedCell, this->OPPONENT_SECOND_SIDE);
+	}
+}
 
-	// Evaluate my possible paths
+void HexAI::pathToSide(int passedStartVertex, int passedEndVertex) {
+	vector<int> discoveredPath = this->BOARD_REFERENCE->dijkstraPath(new vector<int>(), this->OPPONENT_COLOR, passedStartVertex, passedEndVertex);
+	for (int ii = 0; ii < discoveredPath.size(); ii += 1) {
+		int iteratedCell = discoveredPath.at(ii);
+		this->EVALUATION[iteratedCell] += 1;
+	}
 }
 
 void HexAI::executeMove() {
