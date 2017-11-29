@@ -72,6 +72,8 @@ public:
 	// Miscellaneous
 	void printBoard(ostream*);
 	bool checkWinner(char, int, int);
+	bool firstPlayerWon();
+	bool secondPlayerWon();
 	void dijkstraPath(vector<int>*, char, int, int);
 };
 
@@ -183,6 +185,14 @@ bool Board::checkWinner(char passedColor, int passedStartIndex, int passedEndInd
 	}
 	cout << endl;
 	return false;
+}
+
+bool Board::firstPlayerWon() {
+	return this->checkWinner(this->getFirstPlayerColor(), this->getNorthVertex(), this->getSouthVertex());
+}
+
+bool Board::secondPlayerWon() {
+	return this->checkWinner(this->getSecondPlayerColor(), this->getEastVertex(), this->getWestVertex());
 }
 
 /**
