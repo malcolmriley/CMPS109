@@ -79,7 +79,8 @@ void HexAI::evaulateBoard() {
 }
 
 void HexAI::pathToSide(int passedStartVertex, int passedEndVertex) {
-	vector<int> discoveredPath = this->BOARD_REFERENCE->dijkstraPath(new vector<int>(), this->OPPONENT_COLOR, passedStartVertex, passedEndVertex);
+	vector<int> discoveredPath = vector<int>();
+	this->BOARD_REFERENCE->dijkstraPath(&discoveredPath, this->OPPONENT_COLOR, passedStartVertex, passedEndVertex);
 	for (int ii = 0; ii < discoveredPath.size(); ii += 1) {
 		int iteratedCell = discoveredPath.at(ii);
 		this->EVALUATION[iteratedCell] += 1;
