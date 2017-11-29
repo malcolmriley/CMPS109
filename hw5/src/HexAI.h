@@ -91,8 +91,10 @@ void HexAI::executeMove() {
 	int bestMove = 0;
 	int maxValue = -1;
 	for (int ii = 0; ii < this->BOARD_REFERENCE->getCellCount(); ii += 1) {
-		if (this->EVALUATION[ii] > maxValue) {
-			bestMove = ii;
+		if (this->BOARD_REFERENCE->getCellColor(ii) == ' ') {
+			if (this->EVALUATION[ii] > maxValue) {
+				bestMove = ii;
+			}
 		}
 	}
 	this->BOARD_REFERENCE->setCell(this->MY_COLOR, bestMove);
