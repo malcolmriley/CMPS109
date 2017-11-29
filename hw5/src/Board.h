@@ -162,8 +162,8 @@ int Board::getCellCount() {
 /* Manipulators */
 void Board::setCell(char passedColor, int passedVertexID) {
 	if ((passedColor == this->getFirstPlayerColor()) || (passedColor == this->getSecondPlayerColor())) {
-		Cell cell = this->BOARD_REPRESENTATION.getVertex(passedVertexID);
-		cell.color = passedColor;
+		Cell* cell = this->BOARD_REPRESENTATION.getVertex(passedVertexID);
+		cell->color = passedColor;
 	}
 }
 
