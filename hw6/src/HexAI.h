@@ -19,6 +19,7 @@ class HexAI {
 private:
 	// Member Fields
 	Board* BOARD_REFERENCE;
+	Board BOARD_COPY;
 	int* EVALUATION;
 	char MY_COLOR;
 	char OPPONENT_COLOR;
@@ -26,8 +27,10 @@ private:
 
 	// Internal Functions
 	void resetEvaluations();
-	void evaluatePaths(vector<int>*, char);
+	void copyBoard();
 	void pathToSide(int, int);
+	int monteCarlo(int);
+	char randomMove();
 public:
 	// Constructor / Destructor
 	HexAI(Board*, char, char, int, int, int, int);
@@ -39,7 +42,7 @@ public:
 };
 
 /* Constructor / Destructor */
-HexAI::HexAI(Board* passedBoardReference, char passedMyColor, char passedOpponentColor, int passedMyFirstSide, int passedMySecondSide, int passedOponentFirstSide, int passedOponentSecondSide) {
+HexAI::HexAI(Board* passedBoardReference, char passedMyColor, char passedOpponentColor, int passedMyFirstSide, int passedMySecondSide, int passedOponentFirstSide, int passedOponentSecondSide) : BOARD_COPY(passedBoardReference->getDimension(), passedOpponentColor, passedMyColor) {
 	this->BOARD_REFERENCE = passedBoardReference;
 	this->EVALUATION = new int[this->BOARD_REFERENCE->getCellCount()];
 	this->MY_COLOR = passedMyColor;
@@ -58,8 +61,44 @@ HexAI::~HexAI() {
 /* Miscellaneous */
 void HexAI::evaulateBoard() {
 	this->resetEvaluations();
+	for (int ii = 0; ii < this->BOARD_REFERENCE->getCellCount(); ii += 1) {
+		char cellColor = this->BOARD_REFERENCE->getCellColor(ii);
+		if (cellColor == ' ') {
+			this->EVALUATION[ii] = this->monteCarlo(5);
+		}
+	}
+}
 
-	// TODO: Monte Carlo Algorithm
+/**
+ * Performs "passedAttempts" random fills of the board and returns the number of wins.
+ */
+int HexAI::monteCarlo(int passedAttempts) {
+	int victories = 0;
+	for (int ii = 0; ii < passedAttempts; ii += 1) {
+		this->copyBoard();
+		for (int ii = 0; ii < this->BOARD_COPY.getCellCount(); ii += 1) {
+			char cellColor = this->BOARD_COPY.getCellColor(ii);
+			if (cellColor == ' ') {
+				this->BOARD_COPY.setCell(randomMove(), ii);
+			}
+		}
+		if (this->BOARD_COPY.checkWinner(this->MY_COLOR, this->MY_FIRST_SIDE, this->MY_SECOND_SIDE)) {
+			victories += 1;
+		}
+	}
+	return victories;
+}
+
+char HexAI::randomMove() {
+	int random = (rand() % 2);
+	return (random == 0) ? this->MY_COLOR : this->OPPONENT_COLOR;
+}
+
+void HexAI::copyBoard() {
+	for (int ii = 0; ii < this->BOARD_REFERENCE->getCellCount(); ii += 1) {
+		char cellColor = this->BOARD_REFERENCE->getCellColor(ii);
+		this->BOARD_COPY.setCell(cellColor, ii);
+	}
 }
 
 void HexAI::pathToSide(int passedStartVertex, int passedEndVertex) {
@@ -77,6 +116,7 @@ void HexAI::executeMove() {
 	for (int ii = 0; ii < this->BOARD_REFERENCE->getCellCount(); ii += 1) {
 		if (this->BOARD_REFERENCE->getCellColor(ii) == ' ') {
 			if (this->EVALUATION[ii] > maxValue) {
+				maxValue = this->EVALUATION[ii];
 				bestMove = ii;
 			}
 		}
