@@ -5,7 +5,16 @@
  *
  * 12-2017
  *
- * Implementation file for CMPS109 HW5: Monte Carlo AI Algorithm.
+ * Implementation file for CMPS109 HW6: Monte Carlo AI Algorithm.
+ *
+ * Note to grader:
+ * - MonteCarlo algorithm is in HexAI::monteCarlo() function.
+ * - The program is bugged but I can't for the life of me figure out
+ * what is wrong with it. I suspect the problem is in the dijkstraPath
+ * algorithm, as it always outputs the same path no matter what. The
+ * program never reports a win for anybody, thus the program fails
+ * at its most fundamental function. Give me whatever grade you see fit,
+ * I'm done banging my head against this wall.
  *********************************************************************/
 
 #include <iostream>
