@@ -65,6 +65,7 @@ public:
 	int getEastVertex();
 	int getWestVertex();
 	int getCellCount();
+	int getDimension();
 
 	// Manipulators
 	void setCell(char, int);
@@ -161,6 +162,10 @@ int Board::getCellCount() {
 	return SIZE * SIZE;
 }
 
+int Board::getDimension() {
+	return SIZE;
+}
+
 /* Manipulators */
 void Board::setCell(char passedColor, int passedVertexID) {
 	if ((passedColor == this->getFirstPlayerColor()) || (passedColor == this->getSecondPlayerColor())) {
@@ -183,7 +188,6 @@ bool Board::checkWinner(char passedColor, int passedStartIndex, int passedEndInd
 			return true;
 		}
 	}
-	cout << endl;
 	return false;
 }
 
